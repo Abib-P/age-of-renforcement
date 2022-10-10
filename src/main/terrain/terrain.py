@@ -4,12 +4,11 @@ import random
 import arcade
 from arcade import SpriteList
 
+from src.main.terrain.perlin_noise_utils import generate_map
 from src.main.terrain.terrainCell import TerrainCell
 
 
 class Terrain:
-    available_cells = [TerrainCell(0, "", 0)]
-
     width: int
     height: int
     scale: float
@@ -63,10 +62,21 @@ class Terrain:
 
     @staticmethod
     def generate_random_terrain(width: int, height: int, available_cells: [TerrainCell]):
+        noise = generate_map(width, height, [2, 6, 12, 24], 0.5)
+        noise_min = min(min(r) for r in noise)
+        noise_max = max(max(r) for r in noise)
+        noise_delta = noise_max - noise_min
+
+        noise = [[((col - noise_min) / noise_delta) for col in row] for row in noise]
+
         cells: [[TerrainCell]] = [[]]
         for y in range(0, height):
             row = []
             for x in range(0, width):
-                row.append(available_cells[random.randrange(len(available_cells))])
+                noise_value = noise[y][x]
+                for i, cell in enumerate(available_cells):
+                    if noise_value <= ((i + 1) * 1 / len(available_cells)):
+                        row.append(cell)
+                        break
             cells.append(row)
         return Terrain(width, height, cells)
