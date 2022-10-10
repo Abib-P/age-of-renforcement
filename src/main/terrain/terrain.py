@@ -1,3 +1,4 @@
+import math
 import random
 
 import arcade
@@ -11,6 +12,9 @@ class Terrain:
 
     width: int
     height: int
+    scale: float
+    pos_x: int
+    pos_y: int
     cells: [[TerrainCell]]
     cells_sprites: SpriteList
 
@@ -18,18 +22,35 @@ class Terrain:
         self.cells = cells
         self.height = height
         self.width = width
+        self.scale = 10
+        self.pos_x = 0
+        self.pos_y = 0
 
-        self.compute_sprites(50)
-
-    def compute_sprites(self, scale):
         self.cells_sprites = SpriteList()
         for ir, row in enumerate(self.cells):
             for ic, col in enumerate(row):
-                sprite = arcade.Sprite(col.resource_path)
-                sprite.scale = scale / sprite.width
-                sprite.center_x = (ic + 0.5) * scale
-                sprite.center_y = (self.height - ir + 0.5) * scale
-                self.cells_sprites.append(sprite)
+                self.cells_sprites.append(arcade.Sprite(col.resource_path))
+
+        self.compute_sprites_positions()
+
+    def compute_sprites_positions(self):
+        for i, sprite in enumerate(self.cells_sprites):
+            sprite.width = self.scale
+            sprite.height = self.scale
+            sprite.center_x = ((i % self.width) + 0.5 + self.pos_x) * self.scale
+            sprite.center_y = (self.height - math.floor(i / self.width) - 0.5 + self.pos_y) * self.scale
+
+    def move_x(self, dx):
+        self.pos_x += dx
+        self.compute_sprites_positions()
+
+    def move_y(self, dy):
+        self.pos_y += dy
+        self.compute_sprites_positions()
+
+    def set_scale(self, scale):
+        self.scale = scale
+        self.compute_sprites_positions()
 
     def display_to_console(self):
         for row in self.cells:
