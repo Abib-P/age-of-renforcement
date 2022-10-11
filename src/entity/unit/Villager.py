@@ -1,5 +1,5 @@
-from src.main.entity.fighting_entity import FightingEntity
-from src.main.entity.movable_entity import MovableEntity
+from src.entity.FightingEntity import FightingEntity
+from src.entity.MovableEntity import MovableEntity
 
 
 class Villager(FightingEntity, MovableEntity):

@@ -1,4 +1,4 @@
-from src.main.entity.entity import Entity
+from src.entity.Entity import Entity
 
 
 class FightingEntity(Entity):

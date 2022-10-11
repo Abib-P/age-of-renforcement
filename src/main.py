@@ -1,7 +1,7 @@
 import arcade as arcade
 
-from src.main.terrain.terrain import Terrain
-from src.main.terrain.terrainCell import TerrainCell
+from src.terrain.Terrain import Terrain
+from src.terrain.TerrainCell import TerrainCell
 
 
 class MainWindow(arcade.Window):

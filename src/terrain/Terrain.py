@@ -1,11 +1,10 @@
 import math
-import random
 
 import arcade
 from arcade import SpriteList
 
-from src.main.terrain.perlin_noise_utils import generate_map
-from src.main.terrain.terrainCell import TerrainCell
+from src.terrain.PerlinNoiseUtils import generate_map
+from src.terrain.TerrainCell import TerrainCell
 
 
 class Terrain:
