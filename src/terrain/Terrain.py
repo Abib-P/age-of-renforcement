@@ -16,7 +16,7 @@ class Terrain:
     cells: [[TerrainCell]]
     cells_sprites: SpriteList
 
-    def __init__(self, width, height, cells) -> None:
+    def __init__(self, width: int, height: int, cells: [[TerrainCell]]) -> None:
         self.cells = cells
         self.height = height
         self.width = width
@@ -79,3 +79,4 @@ class Terrain:
                         break
             cells.append(row)
         return Terrain(width, height, cells)
+
