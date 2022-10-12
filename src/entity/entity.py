@@ -5,10 +5,10 @@ class Entity:
         self.position = position
 
     def take_damage(self, damage):
-        self.hp -= damage
-        if self.hp <= 0:
+        self.__hp -= damage
+        if self.__hp <= 0:
             self.__die()
 
     def __die(self):
-        self.hp = 0
-        self.position = None
+        self.__hp = 0
+        self.__position = None

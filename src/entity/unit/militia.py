@@ -1,4 +1,4 @@
-from src.entity.eighting_entity import FightingEntity
+from src.entity.fighting_entity import FightingEntity
 from src.entity.movable_entity import MovableEntity
 
 

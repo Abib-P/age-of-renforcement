@@ -3,6 +3,7 @@ import math
 import arcade
 from arcade import SpriteList
 
+from src.entity.position import Position
 from src.terrain.PerlinNoiseUtils import generate_map
 from src.terrain.TerrainCell import TerrainCell
 
