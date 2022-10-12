@@ -7,8 +7,8 @@ class Entity:
     def take_damage(self, damage):
         self.hp -= damage
         if self.hp <= 0:
-            self.die()
+            self.__die()
 
-    def die(self):
+    def __die(self):
         self.hp = 0
         self.position = None
