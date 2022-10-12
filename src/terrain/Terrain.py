@@ -11,7 +11,7 @@ from src.terrain.TerrainCell import TerrainCell
 class Terrain:
     width: int
     height: int
-    scale: float
+    scale: int
     pos_x: int
     pos_y: int
     cells: [[TerrainCell]]
@@ -57,6 +57,10 @@ class Terrain:
                 print(col.id, end=' ')
             print("")
 
+    def cell_to_screen_position(self, position: Position) -> Position:
+        return Position(int(((position.x % self.width) + 0.5 + self.pos_x) * self.scale),
+                        int((self.height - math.floor(position.y / self.width) - 0.5 + self.pos_y) * self.scale))
+
     def draw(self):
         self.cells_sprites.draw()
 
@@ -80,4 +84,3 @@ class Terrain:
                         break
             cells.append(row)
         return Terrain(width, height, cells)
-
