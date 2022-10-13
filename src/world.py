@@ -1,5 +1,4 @@
 import arcade
-from arcade import Sprite
 
 from src.configuration import Configuration
 from src.entity.building.town_center import TownCenter
@@ -20,6 +19,10 @@ def generate_terrain(config):
 
 
 class World:
+    __terrain: Terrain
+    __players: [Player]
+    __turn: int
+
     def __init__(self, config: Configuration):
         self.__terrain = generate_terrain(config)
 
@@ -28,13 +31,21 @@ class World:
             section_name = "Player_" + str(i + 1)
             pos = Position(config.get_int(section_name, 'town_x'),
                            config.get_int(section_name, 'town_y'))
-            center = TownCenter(name=config.get_string('Town Center', 'name'),
-                                health_points=config.get_int('Town Center', 'health_points'), position=pos,
-                                sprite=arcade.Sprite(config.get_string(section_name, 'town_center_sprite')),
-                                terrain=self.__terrain)
-            self.__players = Player(name=config.get_string(section_name, 'name'), color="oui", entities=[center])
+            town_center = TownCenter(name=config.get_string('Town Center', 'name'),
+                                     health_points=config.get_int('Town Center', 'health_points'), position=pos,
+                                     sprite=arcade.Sprite(config.get_string(section_name, 'town_center_sprite')),
+                                     terrain=self.__terrain)
+            self.__terrain.place_entity(town_center)
+            self.__players = Player(name=config.get_string(section_name, 'name'),
+                                    color=config.get_string(section_name, 'color'), entities=[town_center])
 
         self.__turn = 0
+
+    def draw(self):
+        self.__terrain.draw(self.__cells_sprites)
+        for player in self.__players:
+            for entity in player.entities:
+                self.__cells_sprites.append(entity.sprite)
 
     @property
     def terrain(self):

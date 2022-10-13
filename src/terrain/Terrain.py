@@ -1,9 +1,6 @@
 import copy
-import math
 
-import arcade
-from arcade import SpriteList
-
+from src.entity.entity import Entity
 from src.entity.position import Position
 from src.terrain.PerlinNoiseUtils import generate_map
 from src.terrain.TerrainCell import TerrainCell
@@ -61,6 +58,9 @@ class Terrain:
     def cell_to_screen_position(self, position: Position) -> Position:
         return Position(int((position.x + 0.5 + self.pos_x) * self.scale),
                         int((self.height - position.y - 0.5 + self.pos_y) * self.scale))
+
+    def place_entity(self, entity: Entity):
+        self.cells[entity.position.y][entity.position.x].place_entity(entity)
 
     def draw(self):
         self.__cells_sprites.draw()
