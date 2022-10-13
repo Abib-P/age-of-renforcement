@@ -21,7 +21,7 @@ class MainWindow(arcade.Window):
 
     def on_draw(self):
         arcade.start_render()
-        self.__world.terrain.draw()
+        self.__world.draw()
 
     def new_game(self):
         print("new game")

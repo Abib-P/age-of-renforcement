@@ -42,10 +42,7 @@ class World:
         self.__turn = 0
 
     def draw(self):
-        self.__terrain.draw(self.__cells_sprites)
-        for player in self.__players:
-            for entity in player.entities:
-                self.__cells_sprites.append(entity.sprite)
+        self.__terrain.draw()
 
     @property
     def terrain(self):
