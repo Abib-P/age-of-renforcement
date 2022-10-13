@@ -8,3 +8,7 @@ class TerrainCell:
         self.__necessary_move = necessary_move
         self.__resource_path = resource_path
         self.__entity = entity
+
+    @property
+    def resource_path(self):
+        return self.__resource_path

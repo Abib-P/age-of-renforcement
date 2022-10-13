@@ -1,3 +1,5 @@
+import arcade
+
 from src.configuration import Configuration
 from src.entity.building.town_center import TownCenter
 from src.entity.position import Position
@@ -22,13 +24,14 @@ class World:
 
         self.__players = []
         for i in range(config.get_int('Players', 'number')):
-            section_name = "player_" + str(i)
+            section_name = "Player_" + str(i + 1)
             pos = Position(config.get_int(section_name, 'town_x'),
-                           config.get_int(section_name, 'town_y'))  # todo ajouter le sprite du town center
-            center = TownCenter(name=config.get_int('Town Center', 'name'),
-                                health_points=config.get_int('Town Center', 'health_points'), position=pos, sprite=None,
+                           config.get_int(section_name, 'town_y'))
+            center = TownCenter(name=config.get_string('Town Center', 'name'),
+                                health_points=config.get_int('Town Center', 'health_points'), position=pos,
+                                sprite=arcade.Sprite(config.get_string(section_name, 'town_center_sprite')),
                                 terrain=self.__terrain)
-            self.__players = Player(name=config.get_int(section_name, 'name'), color="oui", entities=[center])
+            self.__players = Player(name=config.get_string(section_name, 'name'), color="oui", entities=[center])
 
         self.__turn = 0
 
