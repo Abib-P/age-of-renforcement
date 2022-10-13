@@ -1,4 +1,5 @@
 import arcade
+from arcade import Sprite
 
 from src.configuration import Configuration
 from src.entity.building.town_center import TownCenter

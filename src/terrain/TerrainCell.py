@@ -1,14 +1,18 @@
-class TerrainCell:
-    id: int
-    necessary_move: int
-    resource_path: str
+from arcade import Sprite
 
-    def __init__(self, _id, resource_path, necessary_move, entity=None):
+
+class TerrainCell:
+    def __init__(self, _id, sprite_path: str, necessary_move, entity=None):
         self.__id = _id
         self.__necessary_move = necessary_move
-        self.__resource_path = resource_path
+        self.__sprite = Sprite(sprite_path)
         self.__entity = entity
 
-    @property
-    def resource_path(self):
-        return self.__resource_path
+    def set_position(self, x, y, scale):
+        self.__sprite.width = scale
+        self.__sprite.height = scale
+        self.__sprite.center_x = x
+        self.__sprite.center_y = y
+
+    def draw(self):
+        self.__sprite.draw()
