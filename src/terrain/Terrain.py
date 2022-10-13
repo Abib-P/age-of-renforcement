@@ -1,5 +1,7 @@
 import copy
 
+from arcade import SpriteList
+
 from src.entity.entity import Entity
 from src.entity.position import Position
 from src.terrain.PerlinNoiseUtils import generate_map
