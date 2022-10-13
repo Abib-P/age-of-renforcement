@@ -14,5 +14,6 @@ class TerrainCell:
         self.__sprite.center_x = x
         self.__sprite.center_y = y
 
-    def draw(self):
-        self.__sprite.draw()
+    @property
+    def sprite(self):
+        return self.__sprite

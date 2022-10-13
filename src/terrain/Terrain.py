@@ -16,6 +16,7 @@ class Terrain:
     pos_x: int
     pos_y: int
     cells: [[TerrainCell]]
+    __cells_sprites: SpriteList
 
     def __init__(self, width: int, height: int, cells: [[TerrainCell]]) -> None:
         self.cells = cells
@@ -25,9 +26,15 @@ class Terrain:
         self.pos_x = 0
         self.pos_y = 0
 
+        self.__cells_sprites = SpriteList()
+        for ir, row in enumerate(self.cells):
+            for ic, col in enumerate(row):
+                self.__cells_sprites.append(col.sprite)
+
         self.compute_sprites_positions()
 
     def compute_sprites_positions(self):
+
         for ir, row in enumerate(self.cells):
             for ic, col in enumerate(row):
                 pos = self.cell_to_screen_position(Position(ic, ir))
@@ -56,9 +63,7 @@ class Terrain:
                         int((self.height - position.y - 0.5 + self.pos_y) * self.scale))
 
     def draw(self):
-        for ir, row in enumerate(self.cells):
-            for ic, col in enumerate(row):
-                col.draw()
+        self.__cells_sprites.draw()
 
     @staticmethod
     def generate_random_terrain(width: int, height: int, available_cells: [TerrainCell]):
