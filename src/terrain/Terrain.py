@@ -1,8 +1,9 @@
-import math
+import copy
 
-import arcade
 from arcade import SpriteList
 
+from src.entity.entity import Entity
+from src.entity.position import Position
 from src.terrain.PerlinNoiseUtils import generate_map
 from src.terrain.TerrainCell import TerrainCell
 
@@ -10,11 +11,11 @@ from src.terrain.TerrainCell import TerrainCell
 class Terrain:
     width: int
     height: int
-    scale: float
+    scale: int
     pos_x: int
     pos_y: int
     cells: [[TerrainCell]]
-    cells_sprites: SpriteList
+    __cells_sprites: SpriteList
 
     def __init__(self, width: int, height: int, cells: [[TerrainCell]]) -> None:
         self.cells = cells
@@ -24,19 +25,19 @@ class Terrain:
         self.pos_x = 0
         self.pos_y = 0
 
-        self.cells_sprites = SpriteList()
+        self.__cells_sprites = SpriteList()
         for ir, row in enumerate(self.cells):
             for ic, col in enumerate(row):
-                self.cells_sprites.append(arcade.Sprite(col.resource_path))
+                self.__cells_sprites.append(col.sprite)
 
         self.compute_sprites_positions()
 
     def compute_sprites_positions(self):
-        for i, sprite in enumerate(self.cells_sprites):
-            sprite.width = self.scale
-            sprite.height = self.scale
-            sprite.center_x = ((i % self.width) + 0.5 + self.pos_x) * self.scale
-            sprite.center_y = (self.height - math.floor(i / self.width) - 0.5 + self.pos_y) * self.scale
+
+        for ir, row in enumerate(self.cells):
+            for ic, col in enumerate(row):
+                pos = self.cell_to_screen_position(Position(ic, ir))
+                col.set_position(pos.x, pos.y, self.scale)
 
     def move_x(self, dx):
         self.pos_x += dx
@@ -56,8 +57,15 @@ class Terrain:
                 print(col.id, end=' ')
             print("")
 
+    def cell_to_screen_position(self, position: Position) -> Position:
+        return Position(int((position.x + 0.5 + self.pos_x) * self.scale),
+                        int((self.height - position.y - 0.5 + self.pos_y) * self.scale))
+
+    def place_entity(self, entity: Entity):
+        self.cells[entity.position.y][entity.position.x].place_entity(entity)
+
     def draw(self):
-        self.cells_sprites.draw()
+        self.__cells_sprites.draw()
 
     @staticmethod
     def generate_random_terrain(width: int, height: int, available_cells: [TerrainCell]):
@@ -75,8 +83,7 @@ class Terrain:
                 noise_value = noise[y][x]
                 for i, cell in enumerate(available_cells):
                     if noise_value <= ((i + 1) * 1 / len(available_cells)):
-                        row.append(cell)
+                        row.append(copy.deepcopy(cell))
                         break
             cells.append(row)
         return Terrain(width, height, cells)
-
