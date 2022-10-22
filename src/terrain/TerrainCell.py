@@ -1,6 +1,7 @@
 from arcade import Sprite
 
 from src.entity.entity import Entity
+from src.entity.position import Position
 
 
 class TerrainCell:
@@ -15,11 +16,11 @@ class TerrainCell:
         self.__sprite = Sprite(sprite_path)
         self.__entity = entity
 
-    def set_position(self, x, y, scale):
+    def update_screen_pos(self,  scale, offset: Position):
         self.__sprite.width = scale
         self.__sprite.height = scale
-        self.__sprite.center_x = x
-        self.__sprite.center_y = y
+        self.__sprite.center_x = offset.x
+        self.__sprite.center_y = offset.y
 
     @property
     def sprite(self):

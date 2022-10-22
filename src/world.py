@@ -1,4 +1,5 @@
 import arcade
+from arcade import SpriteList
 
 from src.configuration import Configuration
 from src.entity.building.town_center import TownCenter
@@ -22,11 +23,20 @@ class World:
     __terrain: Terrain
     __players: [Player]
     __turn: int
+    __entities_sprites: SpriteList
+
+    __scale: float
+    __screen_offset: Position
 
     def __init__(self, config: Configuration):
         self.__terrain = generate_terrain(config)
+        self.__scale = 10
+        self.__screen_offset = Position(0, 0)
 
         self.__players = []
+        self.__turn = 0
+        self.__entities_sprites = SpriteList()
+
         for i in range(config.get_int('Players', 'number')):
             section_name = "Player_" + str(i + 1)
             pos = Position(config.get_int(section_name, 'town_x'),
@@ -36,13 +46,33 @@ class World:
                                      sprite=arcade.Sprite(config.get_string(section_name, 'town_center_sprite')),
                                      terrain=self.__terrain)
             self.__terrain.place_entity(town_center)
-            self.__players = Player(name=config.get_string(section_name, 'name'),
-                                    color=config.get_string(section_name, 'color'), entities=[town_center])
+            self.__players.append(Player(name=config.get_string(section_name, 'name'),
+                                         color=config.get_string(section_name, 'color'), entities=[town_center]))
+            self.__entities_sprites.append(town_center.sprite)
 
-        self.__turn = 0
+        self.update_screen_pos()
+
+    def update_screen_pos(self):
+        self.terrain.update_screen_pos(self.__scale, self.__screen_offset)
+        for player in self.__players:
+            for entity in player.entities:
+                entity.update_screen_pos(self.__scale, self.__screen_offset)
+
+    def move_x(self, dx):
+        self.__screen_offset = Position(self.__screen_offset.x + dx, self.__screen_offset.y)
+        self.update_screen_pos()
+
+    def move_y(self, dy):
+        self.__screen_offset = Position(self.__screen_offset.x, self.__screen_offset.y + dy)
+        self.update_screen_pos()
+
+    def set_scale(self, scale: float):
+        self.__scale = scale
+        self.update_screen_pos()
 
     def draw(self):
         self.__terrain.draw()
+        self.__entities_sprites.draw()
 
     @property
     def terrain(self):
@@ -55,3 +85,7 @@ class World:
     @property
     def turn(self):
         return self.__turn
+
+    @property
+    def scale(self):
+        return self.__scale

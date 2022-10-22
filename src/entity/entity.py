@@ -4,6 +4,7 @@ from src.entity.position import Position
 
 
 class Entity:
+    __sprite: Sprite
 
     def __init__(self, name: str, health_points: int, position: Position, sprite: Sprite):
         self.__sprite = sprite
@@ -18,6 +19,12 @@ class Entity:
 
     def set_position(self, position: Position):
         self.__position = position
+
+    def update_screen_pos(self, scale, offset: Position):
+        self.__sprite.center_x = (self.__position.x + 0.5) * scale + offset.x
+        self.__sprite.center_y = (self.__position.y - 0.5) * scale + offset.y + scale
+        self.__sprite.width = scale
+        self.__sprite.height = scale
 
     def draw(self):
         self.__sprite.draw()

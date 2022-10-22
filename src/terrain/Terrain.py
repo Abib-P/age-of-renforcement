@@ -11,9 +11,6 @@ from src.terrain.TerrainCell import TerrainCell
 class Terrain:
     width: int
     height: int
-    scale: int
-    pos_x: int
-    pos_y: int
     cells: [[TerrainCell]]
     __cells_sprites: SpriteList
 
@@ -21,45 +18,23 @@ class Terrain:
         self.cells = cells
         self.height = height
         self.width = width
-        self.scale = 10
-        self.pos_x = 0
-        self.pos_y = 0
 
         self.__cells_sprites = SpriteList()
         for ir, row in enumerate(self.cells):
             for ic, col in enumerate(row):
                 self.__cells_sprites.append(col.sprite)
 
-        self.compute_sprites_positions()
-
-    def compute_sprites_positions(self):
-
+    def update_screen_pos(self, scale, offset: Position):
         for ir, row in enumerate(self.cells):
             for ic, col in enumerate(row):
-                pos = self.cell_to_screen_position(Position(ic, ir))
-                col.set_position(pos.x, pos.y, self.scale)
-
-    def move_x(self, dx):
-        self.pos_x += dx
-        self.compute_sprites_positions()
-
-    def move_y(self, dy):
-        self.pos_y += dy
-        self.compute_sprites_positions()
-
-    def set_scale(self, scale):
-        self.scale = scale
-        self.compute_sprites_positions()
+                col.update_screen_pos(scale, Position(int((ic + 0.5) * scale + offset.x),
+                                                      int((ir - 0.5) * scale + offset.y)))
 
     def display_to_console(self):
         for row in self.cells:
             for col in row:
                 print(col.id, end=' ')
             print("")
-
-    def cell_to_screen_position(self, position: Position) -> Position:
-        return Position(int((position.x + 0.5 + self.pos_x) * self.scale),
-                        int((self.height - position.y - 0.5 + self.pos_y) * self.scale))
 
     def place_entity(self, entity: Entity):
         self.cells[entity.position.y][entity.position.x].place_entity(entity)
