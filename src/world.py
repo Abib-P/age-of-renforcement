@@ -83,7 +83,9 @@ class World:
 
     def draw(self):
         self.__terrain.draw()
-        self.__entities_sprites.draw()
+        for player in self.__players:
+            for entity in player.entities:
+                entity.draw()
 
     @property
     def terrain(self):
