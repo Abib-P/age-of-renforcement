@@ -26,5 +26,9 @@ class TerrainCell:
     def sprite(self):
         return self.__sprite
 
+    @property
+    def id(self):
+        return self.__id
+
     def place_entity(self, entity):
         self.__entity = entity

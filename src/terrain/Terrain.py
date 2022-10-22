@@ -42,6 +42,36 @@ class Terrain:
     def draw(self):
         self.__cells_sprites.draw()
 
+    def save(self, file_path: str):
+        f = open(file_path, "w")
+
+        for row in self.cells:
+            for col in row:
+                f.write(str(col.id) + " ")
+            f.write("\n")
+
+        f.close()
+
+    @staticmethod
+    def load(file_path: str, available_cells: [TerrainCell]):
+        f = open(file_path, "r")
+
+        lines = f.readlines()
+
+        nb_row = len(lines)
+        nb_col = len(lines[0])
+        cells: [[TerrainCell]] = [[]]
+
+        for line in lines:
+            row = []
+            for c in line.split():
+                cell = list(filter(lambda x: x.id == int(c), available_cells))
+                row.append(copy.deepcopy(cell[0]))
+            cells.append(row)
+
+        f.close()
+        return Terrain(nb_row, nb_col, cells)
+
     @staticmethod
     def generate_random_terrain(width: int, height: int, available_cells: [TerrainCell]):
         noise = generate_map(width, height, [2, 6, 12, 24], 0.5)
@@ -51,7 +81,7 @@ class Terrain:
 
         noise = [[((col - noise_min) / noise_delta) for col in row] for row in noise]
 
-        cells: [[TerrainCell]] = [[]]
+        cells: [[TerrainCell]] = []
         for y in range(0, height):
             row = []
             for x in range(0, width):

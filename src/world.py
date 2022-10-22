@@ -19,6 +19,14 @@ def generate_terrain(config):
     return terrain
 
 
+def load_terrain(config, path):
+    terrain_cells = [TerrainCell(0, ":resources:images/tiles/water.png", 0),
+                     TerrainCell(2, ":resources:images/topdown_tanks/tileSand1.png", 0),
+                     TerrainCell(1, ":resources:images/topdown_tanks/tileGrass1.png", 0), ]
+    terrain = Terrain.load(path, terrain_cells)
+    return terrain
+
+
 class World:
     __terrain: Terrain
     __players: [Player]
@@ -30,6 +38,9 @@ class World:
 
     def __init__(self, config: Configuration):
         self.__terrain = generate_terrain(config)
+        self.__terrain.save("./map.txt")
+        # self.__terrain = load_terrain(config, "./map.txt")
+
         self.__scale = 10
         self.__screen_offset = Position(0, 0)
 
