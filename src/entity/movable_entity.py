@@ -5,7 +5,7 @@ from arcade import Color
 
 from src.entity.entity import Entity
 from src.entity.position import Position
-from src.terrain.Terrain import Terrain
+from src.terrain.terrain import Terrain
 
 
 class MovableEntity(Entity):

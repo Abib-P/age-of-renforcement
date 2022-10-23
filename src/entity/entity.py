@@ -24,9 +24,6 @@ class Entity:
         if self.__hp <= 0:
             self.__die()
 
-    def set_position(self, position: Position):
-        self._position = position
-
     def update_screen_pos(self, scale, offset: Position):
         self._scale = scale
         self._screen_offset = offset
@@ -60,6 +57,9 @@ class Entity:
     def __die(self):
         self.__hp = 0
         self._position = None
+
+    def is_alive(self):
+        return self.__hp > 0
 
     @property
     def position(self):

@@ -1,4 +1,3 @@
-from src.entity.building.town_center import TownCenter
 from src.entity.entity import Entity
 
 
@@ -26,7 +25,8 @@ class Player:
         return self.__entities
 
     def is_alive(self) -> bool:
-        for entity in self.__entities:
-            if isinstance(entity, TownCenter):
+        import src.entity.building.town_center as town_center
+        for entity in filter(lambda e: isinstance(e, town_center.TownCenter), self.__entities):
+            if entity.is_alive():
                 return True
         return False

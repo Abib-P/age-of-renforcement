@@ -132,10 +132,14 @@ class World:
         only_one_player_alive: bool = False
         self.__turn += 1
         for player in filter(lambda p: p.is_alive(), self.__players):
-            for entity in player.entities:
-                entity.play_turn(player, self.__terrain)
-                if self.one_player_left():
-                    only_one_player_alive = True
-                    break
+            if player.is_human():
+                # TODO: make player play the game
+                pass
+            else:
+                for entity in player.entities:
+                    entity.auto_play()
+                    if self.one_player_left():
+                        only_one_player_alive = True
+                        break
             if only_one_player_alive:
                 break
