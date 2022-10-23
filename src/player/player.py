@@ -1,4 +1,3 @@
-from src.entity.building.town_center import TownCenter
 from src.entity.entity import Entity
 
 
@@ -25,20 +24,9 @@ class Player:
     def entities(self):
         return self.__entities
 
-    def is_alive(self):
-        for entity in self.__entities:
-            if isinstance(entity, TownCenter):
+    def is_alive(self) -> bool:
+        import src.entity.building.town_center as town_center
+        for entity in filter(lambda e: isinstance(e, town_center.TownCenter), self.__entities):
+            if entity.is_alive():
                 return True
         return False
-
-    def __str__(self):
-        return self.__name
-
-    def __repr__(self):
-        return self.__name
-
-    def __eq__(self, other):
-        return self.__name == other.__name
-
-    def __hash__(self):
-        return hash(self.__name)

@@ -4,8 +4,8 @@ from arcade import SpriteList
 
 from src.entity.entity import Entity
 from src.entity.position import Position
-from src.terrain.PerlinNoiseUtils import generate_map
-from src.terrain.TerrainCell import TerrainCell
+from src.terrain.perlin_noise_utils import generate_map
+from src.terrain.terrain_cell import TerrainCell
 
 
 class Terrain:
@@ -28,7 +28,7 @@ class Terrain:
         for ir, row in enumerate(self.cells):
             for ic, col in enumerate(row):
                 col.update_screen_pos(scale, Position(int((ic + 0.5) * scale + offset.x),
-                                                      int((ir - 0.5) * scale + offset.y)))
+                                                      int((ir - 0.5) * scale + offset.y + scale)))
 
     def display_to_console(self):
         for row in self.cells:
@@ -36,8 +36,24 @@ class Terrain:
                 print(col.id, end=' ')
             print("")
 
+    def is_in_bound(self, position: Position):
+        return 0 <= position.x < self.width and 0 <= position.y < self.height
+
+    def is_cell_empty(self, position: Position):
+        return self.is_in_bound(position) and self.cells[position.y][position.x].entity is None
+
+    def move_entity(self, entity: Entity, destination: Position) -> bool:
+        if self.is_cell_empty(destination):
+            self.cells[entity.position.y][entity.position.x].place_entity(None)
+            self.cells[destination.y][destination.x].place_entity(entity)
+            return True
+        return False
+
     def place_entity(self, entity: Entity):
         self.cells[entity.position.y][entity.position.x].place_entity(entity)
+
+    def get_entity(self, position: Position) -> Entity:
+        return self.cells[position.y][position.x].entity
 
     def draw(self):
         self.__cells_sprites.draw()
