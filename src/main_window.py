@@ -21,17 +21,11 @@ class MainWindow(arcade.Window):
         self.world_dy = 0
         self.world_dx = 0
 
-    def setup(self):
-        print("setup")
-
     def on_draw(self):
         arcade.start_render()
         self.__world.draw()
         if self.__selected_entity is not None:
             self.__selected_entity.draw_on_selection()
-
-    def new_game(self):
-        print("new game")
 
     def on_update(self, delta_time):
         self.__world.move_y(self.world_dy)
@@ -53,7 +47,6 @@ class MainWindow(arcade.Window):
             self.__selected_entity = None
 
     def on_key_press(self, key, modifiers):
-        print("key_press: ", key)
         if key == arcade.key.P:
             self.__world.set_scale(self.__world.scale * 2)
         elif key == arcade.key.M:

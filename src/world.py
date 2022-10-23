@@ -53,26 +53,37 @@ class World:
 
         for i in range(config.get_int('Players', 'number')):
             section_name = "Player_" + str(i + 1)
-            pos = Position(config.get_int(section_name, 'town_x'),
-                           config.get_int(section_name, 'town_y'))
-            town_center = TownCenter(name=config.get_string('Town Center', 'name'),
-                                     health_points=config.get_int('Town Center', 'health_points'), position=pos,
-                                     sprite=arcade.Sprite(config.get_string(section_name, 'town_center_sprite')),
-                                     terrain=self.__terrain)
-            self.__terrain.place_entity(town_center)
+            player = Player(
+                name=config.get_string(section_name, 'name'),
+                color=config.get_string(section_name, 'color')
+            )
 
+            town_center = self.create_town_center(config, section_name)
             pion = Militia(terrain=self.__terrain,
                            name="test", health_points=10,
                            sprite=arcade.Sprite(":resources:images/topdown_tanks/tank_blue.png"),
-                           position=Position(pos.x + 1, pos.y + 1),
+                           position=Position(town_center.position.x + 1, town_center.position.y + 1),
                            moving_points=3, attack_points=1, unit_range=1)
-            self.__terrain.place_entity(pion)
 
-            self.__players.append(Player(name=config.get_string(section_name, 'name'),
-                                         color=config.get_string(section_name, 'color'), entities=[town_center, pion]))
+            self.__terrain.place_entity(town_center)
+            self.__terrain.place_entity(pion)
+            self.__players.append(player)
             self.__entities_sprites.append(town_center.sprite)
+            self.add_initial_unit_to_player(player, units=(pion, town_center))
 
         self.update_screen_pos()
+
+    @staticmethod
+    def add_initial_unit_to_player(player, units: [Entity]):
+        for unit in units:
+            player.add_entity(unit)
+
+    def create_town_center(self, config, section_name):
+        pos = Position(config.get_int(section_name, 'town_x'), config.get_int(section_name, 'town_y'))
+        return TownCenter(name=config.get_string('Town Center', 'name'),
+                          health_points=config.get_int('Town Center', 'health_points'), position=pos,
+                          sprite=arcade.Sprite(config.get_string(section_name, 'town_center_sprite')),
+                          terrain=self.__terrain)
 
     def update_screen_pos(self):
         self.terrain.update_screen_pos(self.__scale, self.__screen_offset)

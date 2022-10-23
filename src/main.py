@@ -8,5 +8,4 @@ if __name__ == '__main__':
     config = Configuration("../config/default.ini")
     world = World(config)
     windows = MainWindow(world)
-    windows.setup()
     arcade.run()

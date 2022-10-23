@@ -2,11 +2,15 @@ from src.entity.entity import Entity
 
 
 class Player:
-    def __init__(self, name: str, color: str, entities: [Entity], is_human: bool = False):
+    __entities: [Entity] = []
+
+    def __init__(self, name: str, color: str, is_human: bool = False):
         self.__name = name
         self.__color = color
         self.__is_human = is_human
-        self.__entities = entities
+
+    def add_entity(self, entity: Entity):
+        self.__entities.append(entity)
 
     @property
     def name(self):

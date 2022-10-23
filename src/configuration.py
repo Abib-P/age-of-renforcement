@@ -4,7 +4,6 @@ import configparser
 class Configuration:
     def __init__(self, file):
         self.__config = configparser.ConfigParser()
-        print(self.__config.read(file))
         self.__config.read(file)
 
     def get_string(self, section, key):
