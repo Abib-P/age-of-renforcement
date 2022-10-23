@@ -8,8 +8,8 @@ from src.entity.movable_entity import MovableEntity
 from src.entity.position import Position
 from src.entity.unit.militia import Militia
 from src.player.player import Player
-from src.terrain.Terrain import Terrain
-from src.terrain.TerrainCell import TerrainCell
+from src.terrain.terrain import Terrain
+from src.terrain.terrain_cell import TerrainCell
 
 
 def generate_terrain(config):
@@ -41,7 +41,7 @@ class World:
 
     def __init__(self, config: Configuration):
         self.__terrain = generate_terrain(config)
-        self.__terrain.save("./map.txt")
+        # self.__terrain.save("./map.txt")
         # self.__terrain = load_terrain(config, "./map.txt")
 
         self.__scale = 10
@@ -124,3 +124,18 @@ class World:
     @property
     def scale(self):
         return self.__scale
+
+    def one_player_left(self) -> bool:
+        return len(self.__players) == 1
+
+    def play_turn(self):
+        only_one_player_alive: bool = False
+        self.__turn += 1
+        for player in filter(lambda p: p.is_alive(), self.__players):
+            for entity in player.entities:
+                entity.play_turn(player, self.__terrain)
+                if self.one_player_left():
+                    only_one_player_alive = True
+                    break
+            if only_one_player_alive:
+                break

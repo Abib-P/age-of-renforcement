@@ -2,7 +2,7 @@ from arcade import Sprite
 
 from src.entity.entity import Entity
 from src.entity.position import Position
-from src.terrain.Terrain import Terrain
+from src.terrain.terrain import Terrain
 
 
 class TownCenter(Entity):
@@ -13,3 +13,4 @@ class TownCenter(Entity):
 
     def create_villager(self):
         pass
+

@@ -4,8 +4,8 @@ from arcade import SpriteList
 
 from src.entity.entity import Entity
 from src.entity.position import Position
-from src.terrain.PerlinNoiseUtils import generate_map
-from src.terrain.TerrainCell import TerrainCell
+from src.terrain.perlin_noise_utils import generate_map
+from src.terrain.terrain_cell import TerrainCell
 
 
 class Terrain:

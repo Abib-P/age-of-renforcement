@@ -25,20 +25,8 @@ class Player:
     def entities(self):
         return self.__entities
 
-    def is_alive(self):
+    def is_alive(self) -> bool:
         for entity in self.__entities:
             if isinstance(entity, TownCenter):
                 return True
         return False
-
-    def __str__(self):
-        return self.__name
-
-    def __repr__(self):
-        return self.__name
-
-    def __eq__(self, other):
-        return self.__name == other.__name
-
-    def __hash__(self):
-        return hash(self.__name)

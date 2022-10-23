@@ -36,6 +36,10 @@ class MainWindow(arcade.Window):
     def on_update(self, delta_time):
         self.__world.move_y(self.world_dy)
         self.__world.move_x(self.world_dx)
+        if not self.__world.one_player_left():
+            self.__world.play_turn()
+        else:
+            print("Game Over")
 
     def on_mouse_press(self, x, y, button, modifiers):
         if button == arcade.MOUSE_BUTTON_LEFT:
