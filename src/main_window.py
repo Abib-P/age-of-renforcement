@@ -62,6 +62,8 @@ class MainWindow(arcade.Window):
             self.world_dx = 10
         elif key == arcade.key.D:
             self.world_dx = -10
+        elif key == arcade.key.ESCAPE:
+            self.close()
 
     def on_key_release(self, key: int, modifiers: int):
         super().on_key_release(key, modifiers)
