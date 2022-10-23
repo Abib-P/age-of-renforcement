@@ -27,6 +27,8 @@ class MainWindow(arcade.Window):
     def on_draw(self):
         arcade.start_render()
         self.__world.draw()
+        if self.__selected_entity is not None:
+            self.__selected_entity.draw_on_selection()
 
     def new_game(self):
         print("new game")
@@ -43,6 +45,8 @@ class MainWindow(arcade.Window):
                 self.__world.move_entity(self.__selected_entity,
                                          self.__world.screen_position_to_terrain(Position(x, y)))
                 self.__selected_entity = None
+        elif button == arcade.MOUSE_BUTTON_RIGHT:
+            self.__selected_entity = None
 
     def on_key_press(self, key, modifiers):
         print("key_press: ", key)

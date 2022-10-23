@@ -3,6 +3,9 @@ class Position:
         self.__x = x
         self.__y = y
 
+    def __eq__(self, o: object) -> bool:
+        return self.__x == o.x and self.__y == o.y
+
     @property
     def x(self):
         return self.__x

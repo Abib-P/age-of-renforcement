@@ -65,7 +65,7 @@ class World:
                            name="test", health_points=10,
                            sprite=arcade.Sprite(":resources:images/topdown_tanks/tank_blue.png"),
                            position=Position(pos.x + 1, pos.y + 1),
-                           moving_points=10000, attack_points=1, unit_range=1)
+                           moving_points=3, attack_points=1, unit_range=1)
             self.__terrain.place_entity(pion)
 
             self.__players.append(Player(name=config.get_string(section_name, 'name'),
