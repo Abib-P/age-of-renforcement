@@ -132,7 +132,7 @@ class World:
         only_one_player_alive: bool = False
         self.__turn += 1
         for player in filter(lambda p: p.is_alive(), self.__players):
-            if player.is_human():
+            if player.is_human:
                 # TODO: make player play the game
                 pass
             else:
