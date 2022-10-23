@@ -1,4 +1,5 @@
 import copy
+from typing import Any
 
 from arcade import SpriteList
 
@@ -50,9 +51,12 @@ class Terrain:
         return False
 
     def place_entity(self, entity: Entity):
-        self.cells[entity.position.y][entity.position.x].place_entity(entity)
+        if self.is_in_bound(entity.position):
+            self.cells[entity.position.y][entity.position.x].place_entity(entity)
 
-    def get_entity(self, position: Position) -> Entity:
+    def get_entity(self, position: Position) -> Any | None:
+        if not self.is_in_bound(position):
+            return None
         return self.cells[position.y][position.x].entity
 
     def draw(self):
