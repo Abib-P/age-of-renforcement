@@ -8,5 +8,5 @@ class TownCenter(Building):
     def __create_villager(self):
         pass
 
-    def play(self):
+    def auto_play(self):
         self.__create_villager()
