@@ -12,19 +12,20 @@ class Militia(FightingEntity, MovableEntity):
     def on_action(self, destination: Position):
         if self._has_played:
             return
-        super().on_action(destination)
         entity = self._terrain.get_entity(destination)
-
         if entity is None:
-            super().move(destination)
+            if super().move(destination):
+                super().on_action(destination)
         elif entity.belongs_to(self._player):
             pass
         elif self._position.dist(destination) <= self._unit_range:
             self.attack(entity)
+            super().on_action(destination)
         else:
             best = sorted(self._possible_move, key=lambda x: x[0].dist(destination))
             if len(best) > 0 and super().move(best[0][0]):
                 self.attack(entity)
+                super().on_action(destination)
 
     def compute_possible_action(self):
         if not self._has_played:

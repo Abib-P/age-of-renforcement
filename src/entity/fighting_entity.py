@@ -5,6 +5,7 @@ import arcade
 from src.entity.attackable_entity import AttackableEntity
 from src.entity.entity import Entity
 from src.entity.player_entitiy import PlayerEntity
+from src.entity.position import Position
 
 
 class FightingEntity(AttackableEntity, PlayerEntity, Entity):
@@ -27,15 +28,6 @@ class FightingEntity(AttackableEntity, PlayerEntity, Entity):
 
     def draw(self):
         super().draw()
-
-        arcade.draw_rectangle_filled((self._position.x + 0.5) * self._scale + self._screen_offset.x,
-                                     (self._position.y + 1) * self._scale + self._screen_offset.y,
-                                     15 * (self._hp / self._max_hp) * self._scale / 10,
-                                     self._scale / 2,
-                                     arcade.color.GREEN)
-
-        arcade.draw_rectangle_outline((self._position.x + 0.5) * self._scale + self._screen_offset.x,
-                                      (self._position.y + 1) * self._scale + self._screen_offset.y,
-                                      15 * self._scale / 10,
-                                      self._scale / 2,
-                                      arcade.color.BLACK)
+        self.draw_ui(Position((self._position.x + 0.5) * self._scale + self._screen_offset.x,
+                              (self._position.y + 1) * self._scale + self._screen_offset.y, ),
+                     self._scale)

@@ -64,6 +64,7 @@ class MainWindow(arcade.Window):
         elif key == arcade.key.ESCAPE:
             self.close()
         elif key == arcade.key.ENTER:
+            self.__selected_entity = None
             self.__world.player_end_turn()
 
     def on_key_release(self, key: int, modifiers: int):

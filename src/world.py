@@ -4,7 +4,6 @@ from arcade import SpriteList
 from src.configuration import Configuration
 from src.entity.building.town_center import TownCenter
 from src.entity.entity import Entity
-from src.entity.movable_entity import MovableEntity
 from src.entity.player_entitiy import PlayerEntity
 from src.entity.position import Position
 from src.entity.unit.militia import Militia
@@ -62,7 +61,7 @@ class World:
                 is_human=config.get_bool(section_name, 'human'),
             )
 
-            town_center = self.create_town_center(config, section_name)
+            town_center = self.create_town_center(config, section_name, player)
             pion = Militia(terrain=self.__terrain,
                            name="test",
                            sprite=arcade.Sprite(config.get_string(section_name, 'militia_sprite')),
@@ -87,11 +86,12 @@ class World:
         for unit in units:
             player.add_entity(unit)
 
-    def create_town_center(self, config: Configuration, section_name: str) -> TownCenter:
+    def create_town_center(self, config: Configuration, section_name: str, player: Player) -> TownCenter:
         pos = Position(config.get_int(section_name, 'town_x'), config.get_int(section_name, 'town_y'))
         return TownCenter(name=config.get_string('Town Center', 'name'),
                           health_points=config.get_int('Town Center', 'health_points'),
                           position=pos,
+                          player=player,
                           sprite=arcade.Sprite(config.get_string(section_name, 'town_center_sprite')),
                           terrain=self.__terrain)
 
@@ -158,7 +158,7 @@ class World:
             self._next_player()
 
     def is_game_ended(self) -> bool:
-        return not any(p.is_alive() for p in self.__players)
+        return len([p for p in self.__players if p.is_alive()]) == 1
 
     def play_turn(self):
         if self.__current_player.is_human:

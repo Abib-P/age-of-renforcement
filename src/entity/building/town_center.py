@@ -13,3 +13,5 @@ class TownCenter(Building):
 
     def auto_play(self):
         self.__create_villager()
+
+
