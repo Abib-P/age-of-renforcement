@@ -20,8 +20,10 @@ class FightingEntity(AttackableEntity, PlayerEntity, Entity):
 
     def take_damage(self, damage):
         super().take_damage(damage)
-        if not self.is_alive():
-            self._player.remove_entity(self)
+
+    def _die(self):
+        super()._die()
+        self._player.remove_entity(self)
 
     def draw(self):
         super().draw()

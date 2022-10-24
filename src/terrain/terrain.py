@@ -56,6 +56,10 @@ class Terrain:
         if self.is_in_bound(entity.position):
             self.cells[entity.position.y][entity.position.x].place_entity(entity)
 
+    def remove_entity(self, entity: Entity):
+        if self.is_in_bound(entity.position):
+            self.cells[entity.position.y][entity.position.x].place_entity(None)
+
     def get_entity(self, position: Position) -> Any | None:
         if not self.is_in_bound(position):
             return None

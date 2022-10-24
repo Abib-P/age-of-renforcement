@@ -19,6 +19,10 @@ class Militia(FightingEntity, MovableEntity):
                 super().move(best[0][0])
                 self.attack(entity)
 
+    def _die(self):
+        super()._die()
+        self._terrain.remove_entity(self)
+
     def auto_play(self):
         pass
         # raise NotImplementedError

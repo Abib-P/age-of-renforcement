@@ -13,7 +13,7 @@ class AttackableEntity:
     def take_damage(self, damage):
         self._hp -= damage
         if self._hp <= 0:
-            self.__die()
+            self._die()
 
-    def __die(self):
+    def _die(self):
         self._hp = 0
