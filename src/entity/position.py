@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 from math import sqrt
 
 
@@ -8,7 +7,7 @@ class Position:
         self.__x = x
         self.__y = y
 
-    def __eq__(self, o: Position) -> bool:
+    def __eq__(self, o: object) -> bool:
         return self.__x == o.x and self.__y == o.y
 
     def dist(self, pos: Position) -> float:
