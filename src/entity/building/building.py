@@ -3,6 +3,7 @@ from src.terrain.terrain import Terrain
 
 
 class Building(Entity):
+    _terrain: Terrain
     def __init__(self, terrain: Terrain, **kwargs):
         super().__init__(**kwargs)
-        self.__terrain = terrain
+        self._terrain = terrain

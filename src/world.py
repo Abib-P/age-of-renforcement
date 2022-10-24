@@ -58,10 +58,10 @@ class World:
                 color=config.get_string(section_name, 'color')
             )
 
-            town_center = self.create_town_center(config, section_name)
+            town_center = self.create_town_center(config, section_name, player)
             pion = Militia(terrain=self.__terrain,
                            name="test", health_points=10,
-                           sprite=arcade.Sprite(":resources:images/topdown_tanks/tank_blue.png"),
+                           sprite=arcade.Sprite(config.get_string(section_name, 'militia_sprite')),
                            position=Position(town_center.position.x + 1, town_center.position.y + 1),
                            moving_points=3, attack_points=1, unit_range=1)
 
@@ -78,8 +78,9 @@ class World:
         for unit in units:
             player.add_entity(unit)
 
-    def create_town_center(self, config, section_name):
+    def create_town_center(self, config: Configuration, section_name: str, player: Player) -> TownCenter:
         pos = Position(config.get_int(section_name, 'town_x'), config.get_int(section_name, 'town_y'))
+        TownCenter.default_sprites[player] = arcade.Sprite(config.get_string(section_name, 'town_center_sprite'))
         return TownCenter(name=config.get_string('Town Center', 'name'),
                           health_points=config.get_int('Town Center', 'health_points'), position=pos,
                           sprite=arcade.Sprite(config.get_string(section_name, 'town_center_sprite')),
