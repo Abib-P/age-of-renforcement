@@ -1,7 +1,6 @@
 from queue import Queue
 
 import arcade
-from arcade import Color
 
 from src.entity.entity import Entity
 from src.entity.position import Position
@@ -9,15 +8,15 @@ from src.terrain.terrain import Terrain
 
 
 class MovableEntity(Entity):
-    __terrain: Terrain
+    _terrain: Terrain
     __moving_points: int
-    __possible_move: [(Position, int)]
+    _possible_mov: [(Position, int)]
 
     def __init__(self, terrain: Terrain, moving_points: int, **kwargs):
         super(MovableEntity, self).__init__(**kwargs)
         self.__moving_points = moving_points
-        self.__terrain = terrain
-        self.compute_possible_move()
+        self._terrain = terrain
+        self.compute_possible_action()
 
     @staticmethod
     def get_nb_move(start: Position, destination: Position, terrain: Terrain) -> int:
@@ -25,13 +24,13 @@ class MovableEntity(Entity):
         return abs(start.x - destination.x) + abs(start.y - destination.y)
 
     def move(self, destination: Position):
-        if any(filter(lambda x: x[0] == destination, self.__possible_move)) \
-                and self.__terrain.move_entity(self, destination):
+        if any(filter(lambda x: x[0] == destination, self._possible_move)) \
+                and self._terrain.move_entity(self, destination):
             self._position = destination
-            self.compute_possible_move()
+            self.compute_possible_action()
 
-    def compute_possible_move(self):
-        self.__possible_move = []
+    def compute_possible_action(self):
+        self._possible_move = []
         to_check = Queue()
         to_check.put((Position(self._position.x + 1, self._position.y), self.__moving_points))
         to_check.put((Position(self._position.x, self._position.y + 1), self.__moving_points))
@@ -41,19 +40,19 @@ class MovableEntity(Entity):
         while not to_check.empty():
             pos = to_check.get()
 
-            if not self.__terrain.is_in_bound(pos[0]) or any(filter(lambda x: x[0] == pos[0], self.__possible_move)):
+            if not self._terrain.is_in_bound(pos[0]) or any(filter(lambda x: x[0] == pos[0], self._possible_move)):
                 continue
 
             necessary_point_to_move = 1  # TODO check from terrain
-            if self.__terrain.is_cell_empty(pos[0]) and pos[1] >= necessary_point_to_move:
-                self.__possible_move.append(pos)
+            if self._terrain.is_cell_empty(pos[0]) and pos[1] >= necessary_point_to_move:
+                self._possible_move.append(pos)
                 to_check.put((Position(pos[0].x + 1, pos[0].y), pos[1] - necessary_point_to_move))
                 to_check.put((Position(pos[0].x, pos[0].y + 1), pos[1] - necessary_point_to_move))
                 to_check.put((Position(pos[0].x - 1, pos[0].y), pos[1] - necessary_point_to_move))
                 to_check.put((Position(pos[0].x, pos[0].y - 1), pos[1] - necessary_point_to_move))
 
     def draw_on_selection(self):
-        for pos in self.__possible_move:
+        for pos in self._possible_move:
             start_x = (pos[0].x + 0.5) * self._scale + self._screen_offset.x
             start_y = (pos[0].y + 0.5) * self._scale + self._screen_offset.y
             size = self._scale

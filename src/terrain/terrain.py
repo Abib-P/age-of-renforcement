@@ -41,7 +41,9 @@ class Terrain:
         return 0 <= position.x < self.width and 0 <= position.y < self.height
 
     def is_cell_empty(self, position: Position):
-        return self.is_in_bound(position) and self.cells[position.y][position.x].entity is None
+        return self.is_in_bound(position) and \
+               ((self.cells[position.y][position.x].entity is None)
+                or (not self.cells[position.y][position.x].entity.is_alive()))
 
     def move_entity(self, entity: Entity, destination: Position) -> bool:
         if self.is_cell_empty(destination):
