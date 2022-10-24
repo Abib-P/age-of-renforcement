@@ -16,18 +16,22 @@ class MovableEntity(Entity):
         super(MovableEntity, self).__init__(**kwargs)
         self.__moving_points = moving_points
         self._terrain = terrain
-        self.compute_possible_action()
+        self._possible_move = []
+
 
     @staticmethod
     def get_nb_move(start: Position, destination: Position, terrain: Terrain) -> int:
         # TODO take in consideration terrain
         return abs(start.x - destination.x) + abs(start.y - destination.y)
 
-    def move(self, destination: Position):
-        if any(filter(lambda x: x[0] == destination, self._possible_move)) \
+    def move(self, destination: Position) -> bool:
+        if any(x[0] == destination for x in self._possible_move) \
                 and self._terrain.move_entity(self, destination):
             self._position = destination
             self.compute_possible_action()
+            self._possible_move = []
+            return True
+        return False
 
     def compute_possible_action(self):
         self._possible_move = []

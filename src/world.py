@@ -5,6 +5,7 @@ from src.configuration import Configuration
 from src.entity.building.town_center import TownCenter
 from src.entity.entity import Entity
 from src.entity.movable_entity import MovableEntity
+from src.entity.player_entitiy import PlayerEntity
 from src.entity.position import Position
 from src.entity.unit.militia import Militia
 from src.player.player import Player
@@ -32,6 +33,8 @@ def load_terrain(config, path):
 
 class World:
     __terrain: Terrain
+    __current_player_index: int
+    __current_player: Player
     __players: [Player]
     __turn: int
     __entities_sprites: SpriteList
@@ -55,7 +58,8 @@ class World:
             section_name = "Player_" + str(i + 1)
             player = Player(
                 name=config.get_string(section_name, 'name'),
-                color=config.get_string(section_name, 'color')
+                color=config.get_string(section_name, 'color'),
+                is_human=config.get_bool(section_name, 'human'),
             )
 
             town_center = self.create_town_center(config, section_name)
@@ -65,7 +69,7 @@ class World:
                            position=Position(town_center.position.x + 1, town_center.position.y + 1),
                            player=player,
                            health_points=10,
-                           moving_points=50,
+                           moving_points=10,
                            attack_points=5, unit_range=1)
 
             self.__terrain.place_entity(town_center)
@@ -74,6 +78,8 @@ class World:
             self.__entities_sprites.append(town_center.sprite)
             self.add_initial_unit_to_player(player, units=[pion, town_center])
 
+        self.__current_player_index = 0
+        self.__current_player = self.__players[self.__current_player_index]
         self.update_screen_pos()
 
     @staticmethod
@@ -114,9 +120,11 @@ class World:
     def get_entity_on_clic(self, clic: Position) -> Entity:
         return self.__terrain.get_entity(self.screen_position_to_terrain(clic))
 
-    def move_entity(self, entity: Entity, position: Position):
-        if isinstance(entity, MovableEntity):
-            entity.move(position)
+    def action_entity(self, entity: Entity, position: Position):
+        if not self.__current_player.is_human:
+            pass
+        elif isinstance(entity, PlayerEntity) and entity.belongs_to(self.__current_player):
+            entity.on_action(position)
 
     def draw(self):
         self.__terrain.draw()
@@ -140,21 +148,22 @@ class World:
     def scale(self):
         return self.__scale
 
-    def one_player_left(self) -> bool:
-        return len(self.__players) == 1
+    def _next_player(self):
+        self.__current_player.end_turn()
+        self.__current_player_index = (self.__current_player_index + 1) % len(self.__players)
+        self.__current_player = self.__players[self.__current_player_index]
+
+    def player_end_turn(self):
+        if self.__current_player.is_human:
+            self._next_player()
+
+    def is_game_ended(self) -> bool:
+        return not any(p.is_alive() for p in self.__players)
 
     def play_turn(self):
-        only_one_player_alive: bool = False
-        self.__turn += 1
-        for player in filter(lambda p: p.is_alive(), self.__players):
-            if player.is_human:
-                # TODO: make player play the game
-                pass
-            else:
-                for entity in player.entities:
-                    entity.auto_play()
-                    if self.one_player_left():
-                        only_one_player_alive = True
-                        break
-            if only_one_player_alive:
-                break
+        if self.__current_player.is_human:
+            pass
+        else:
+            for entity in self.__current_player.entities:
+                entity.auto_play()
+            self._next_player()

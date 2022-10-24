@@ -32,6 +32,11 @@ class Player:
     def entities(self):
         return self.__entities
 
+    def end_turn(self):
+        from src.entity.player_entitiy import PlayerEntity
+        for entity in filter(lambda e: isinstance(e, PlayerEntity), self.__entities):
+            entity.reset()
+
     def is_alive(self) -> bool:
         import src.entity.building.town_center as town_center
         for entity in filter(lambda e: isinstance(e, town_center.TownCenter), self.__entities):

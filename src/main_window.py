@@ -30,7 +30,7 @@ class MainWindow(arcade.Window):
     def on_update(self, delta_time):
         self.__world.move_y(self.world_dy)
         self.__world.move_x(self.world_dx)
-        if not self.__world.one_player_left():
+        if not self.__world.is_game_ended():
             self.__world.play_turn()
         else:
             print("Game Over")
@@ -39,9 +39,11 @@ class MainWindow(arcade.Window):
         if button == arcade.MOUSE_BUTTON_LEFT:
             if self.__selected_entity is None:
                 self.__selected_entity = self.__world.get_entity_on_clic(Position(x, y))
+                if self.__selected_entity is not None:
+                    self.__selected_entity.compute_possible_action()
             else:
-                self.__world.move_entity(self.__selected_entity,
-                                         self.__world.screen_position_to_terrain(Position(x, y)))
+                self.__world.action_entity(self.__selected_entity,
+                                           self.__world.screen_position_to_terrain(Position(x, y)))
                 self.__selected_entity = None
         elif button == arcade.MOUSE_BUTTON_RIGHT:
             self.__selected_entity = None
@@ -61,6 +63,8 @@ class MainWindow(arcade.Window):
             self.world_dx = -10
         elif key == arcade.key.ESCAPE:
             self.close()
+        elif key == arcade.key.ENTER:
+            self.__world.player_end_turn()
 
     def on_key_release(self, key: int, modifiers: int):
         super().on_key_release(key, modifiers)
