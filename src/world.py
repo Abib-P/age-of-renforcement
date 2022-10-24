@@ -60,16 +60,19 @@ class World:
 
             town_center = self.create_town_center(config, section_name)
             pion = Militia(terrain=self.__terrain,
-                           name="test", health_points=10,
-                           sprite=arcade.Sprite(":resources:images/topdown_tanks/tank_blue.png"),
+                           name="test",
+                           sprite=arcade.Sprite(config.get_string(section_name, 'militia_sprite')),
                            position=Position(town_center.position.x + 1, town_center.position.y + 1),
-                           moving_points=3, attack_points=1, unit_range=1)
+                           player=player,
+                           health_points=10,
+                           moving_points=50,
+                           attack_points=5, unit_range=1)
 
             self.__terrain.place_entity(town_center)
             self.__terrain.place_entity(pion)
             self.__players.append(player)
             self.__entities_sprites.append(town_center.sprite)
-            self.add_initial_unit_to_player(player, units=(pion, town_center))
+            self.add_initial_unit_to_player(player, units=[pion, town_center])
 
         self.update_screen_pos()
 
@@ -78,10 +81,11 @@ class World:
         for unit in units:
             player.add_entity(unit)
 
-    def create_town_center(self, config, section_name):
+    def create_town_center(self, config: Configuration, section_name: str) -> TownCenter:
         pos = Position(config.get_int(section_name, 'town_x'), config.get_int(section_name, 'town_y'))
         return TownCenter(name=config.get_string('Town Center', 'name'),
-                          health_points=config.get_int('Town Center', 'health_points'), position=pos,
+                          health_points=config.get_int('Town Center', 'health_points'),
+                          position=pos,
                           sprite=arcade.Sprite(config.get_string(section_name, 'town_center_sprite')),
                           terrain=self.__terrain)
 

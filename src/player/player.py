@@ -2,15 +2,19 @@ from src.entity.entity import Entity
 
 
 class Player:
-    __entities: [Entity] = []
+    __entities: [Entity]
 
     def __init__(self, name: str, color: str, is_human: bool = False):
         self.__name = name
         self.__color = color
         self.__is_human = is_human
+        self.__entities = []
 
     def add_entity(self, entity: Entity):
         self.__entities.append(entity)
+
+    def remove_entity(self, entity: Entity):
+        self.__entities.remove(entity)
 
     @property
     def name(self):
