@@ -1,3 +1,5 @@
+import random
+
 import arcade
 from arcade import SpriteList
 
@@ -61,21 +63,12 @@ class World:
                 is_human=config.get_bool(section_name, 'human'),
             )
 
-            town_center = self.create_town_center(config, section_name, player)
-            pion = Militia(terrain=self.__terrain,
-                           name="test",
-                           sprite=arcade.Sprite(config.get_string(section_name, 'militia_sprite')),
-                           position=Position(town_center.position.x + 1, town_center.position.y + 1),
-                           player=player,
-                           health_points=10,
-                           moving_points=10,
-                           attack_points=5, unit_range=1)
-
+            town_center = self.create_town_center(config, section_name, player, self.__terrain)
+            town_center.create_villager()
             self.__terrain.place_entity(town_center)
-            self.__terrain.place_entity(pion)
             self.__players.append(player)
             self.__entities_sprites.append(town_center.sprite)
-            self.add_initial_unit_to_player(player, units=[pion, town_center])
+            self.add_initial_unit_to_player(player, units=[town_center])
 
         self.__current_player_index = 0
         self.__current_player = self.__players[self.__current_player_index]
@@ -86,8 +79,15 @@ class World:
         for unit in units:
             player.add_entity(unit)
 
-    def create_town_center(self, config: Configuration, section_name: str, player: Player) -> TownCenter:
-        pos = Position(config.get_int(section_name, 'town_x'), config.get_int(section_name, 'town_y'))
+    def create_town_center(self, config: Configuration, section_name: str, player: Player, terrain: Terrain) -> TownCenter:
+        pos : Position
+        if not self.__players :
+            pos = Position(random.randrange(terrain.width), random.randrange(terrain.height))
+        else :
+            old_pos = self.__players[0].get_town_center().position
+            pos = Position(random.randrange(terrain.width), random.randrange(terrain.height))
+            while pos.dist(old_pos) < terrain.width/3 :
+                pos = Position(random.randrange(terrain.width), random.randrange(terrain.height))
         return TownCenter(name=config.get_string('Town Center', 'name'),
                           health_points=config.get_int('Town Center', 'health_points'),
                           position=pos,

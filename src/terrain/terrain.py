@@ -10,60 +10,60 @@ from src.terrain.terrain_cell import TerrainCell
 
 
 class Terrain:
-    width: int
-    height: int
-    cells: [[TerrainCell]]
+    __width: int
+    __height: int
+    __cells: [[TerrainCell]]
     __cells_sprites: SpriteList
 
     def __init__(self, width: int, height: int, cells: [[TerrainCell]]) -> None:
-        self.cells = cells
-        self.height = height
-        self.width = width
+        self.__cells = cells
+        self.__height = height
+        self.__width = width
 
         self.__cells_sprites = SpriteList()
-        for ir, row in enumerate(self.cells):
+        for ir, row in enumerate(self.__cells):
             for ic, col in enumerate(row):
                 self.__cells_sprites.append(col.sprite)
 
     def update_screen_pos(self, scale, offset: Position):
-        for ir, row in enumerate(self.cells):
+        for ir, row in enumerate(self.__cells):
             for ic, col in enumerate(row):
                 col.update_screen_pos(scale, Position(int((ic + 0.5) * scale + offset.x),
                                                       int((ir - 0.5) * scale + offset.y + scale)))
 
     def display_to_console(self):
-        for row in self.cells:
+        for row in self.__cells:
             for col in row:
                 print(col.id, end=' ')
             print("")
 
     def is_in_bound(self, position: Position):
-        return 0 <= position.x < self.width and 0 <= position.y < self.height
+        return 0 <= position.x < self.__width and 0 <= position.y < self.__height
 
     def is_cell_empty(self, position: Position):
         return self.is_in_bound(position) and \
-               ((self.cells[position.y][position.x].entity is None)
-                or (not self.cells[position.y][position.x].entity.is_alive()))
+               ((self.__cells[position.y][position.x].entity is None)
+                or (not self.__cells[position.y][position.x].entity.is_alive()))
 
     def move_entity(self, entity: Entity, destination: Position) -> bool:
         if self.is_cell_empty(destination):
-            self.cells[entity.position.y][entity.position.x].place_entity(None)
-            self.cells[destination.y][destination.x].place_entity(entity)
+            self.__cells[entity.position.y][entity.position.x].place_entity(None)
+            self.__cells[destination.y][destination.x].place_entity(entity)
             return True
         return False
 
     def place_entity(self, entity: Entity):
         if self.is_in_bound(entity.position):
-            self.cells[entity.position.y][entity.position.x].place_entity(entity)
+            self.__cells[entity.position.y][entity.position.x].place_entity(entity)
 
     def remove_entity(self, entity: Entity):
         if self.is_in_bound(entity.position):
-            self.cells[entity.position.y][entity.position.x].place_entity(None)
+            self.__cells[entity.position.y][entity.position.x].place_entity(None)
 
     def get_entity(self, position: Position) -> Any | None:
         if not self.is_in_bound(position):
             return None
-        return self.cells[position.y][position.x].entity
+        return self.__cells[position.y][position.x].entity
 
     def draw(self):
         self.__cells_sprites.draw()
@@ -71,12 +71,20 @@ class Terrain:
     def save(self, file_path: str):
         f = open(file_path, "w")
 
-        for row in self.cells:
+        for row in self.__cells:
             for col in row:
                 f.write(str(col.id) + " ")
             f.write("\n")
 
         f.close()
+
+    @property
+    def width(self):
+        return self.__width
+
+    @property
+    def height(self):
+        return self.__height
 
     @staticmethod
     def load(file_path: str, available_cells: [TerrainCell]):

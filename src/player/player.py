@@ -43,3 +43,9 @@ class Player:
             if entity.is_alive():
                 return True
         return False
+
+    def get_town_center(self) -> Entity | None:
+        import src.entity.building.town_center as town_center
+        for entity in filter(lambda e: isinstance(e, town_center.TownCenter), self.__entities):
+            return entity
+        return None

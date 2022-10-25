@@ -35,6 +35,9 @@ class Militia(FightingEntity, MovableEntity):
         super()._die()
         self._terrain.remove_entity(self)
 
+    def set_position(self):
+        self._position = Position()
+
     def auto_play(self):
         self.compute_possible_action()
         if len(self._possible_move) > 0:
