@@ -3,6 +3,7 @@ import random
 import arcade
 from arcade import SpriteList
 
+from src.ai.militia_ai import MilitiaAi
 from src.configuration import Configuration
 from src.entity.building.town_center import TownCenter
 from src.entity.entity import Entity
@@ -33,60 +34,70 @@ def load_terrain(config, path):
 
 
 class World:
+    __config: Configuration
     __terrain: Terrain
     __current_player_index: int
     __current_player: Player
     __players: [Player]
     __turn: int
-    __entities_sprites: SpriteList
 
     __scale: float
     __screen_offset: Position
 
+    __militia_ai: MilitiaAi
+
     def __init__(self, config: Configuration):
         self.__terrain = generate_terrain(config)
+        self.__config = config
         # self.__terrain.save("./map.txt")
         # self.__terrain = load_terrain(config, "./map.txt")
 
         self.__scale = 10
         self.__screen_offset = Position(0, 0)
 
+        self.__militia_ai = MilitiaAi([], alpha=0.8, gamma=0.8)
+        self.__militia_ai.load("./ai.ai")
+        self.reset()
+
+    def reset(self):
         self.__players = []
         self.__turn = 0
-        self.__entities_sprites = SpriteList()
 
-        for i in range(config.get_int('Players', 'number')):
+        for i in range(self.__config.get_int('Players', 'number')):
             section_name = "Player_" + str(i + 1)
             player = Player(
-                name=config.get_string(section_name, 'name'),
-                color=config.get_string(section_name, 'color'),
-                is_human=config.get_bool(section_name, 'human'),
+                name=self.__config.get_string(section_name, 'name'),
+                color=self.__config.get_string(section_name, 'color'),
+                is_human=self.__config.get_bool(section_name, 'human'),
             )
 
-            town_center = self.create_town_center(config, section_name, player, self.__terrain)
+            town_center = self.create_town_center(self.__config, section_name, player, self.__terrain)
             town_center.create_villager()
             self.__terrain.place_entity(town_center)
             self.__players.append(player)
-            self.__entities_sprites.append(town_center.sprite)
             self.add_initial_unit_to_player(player, units=[town_center])
 
         self.__current_player_index = 0
         self.__current_player = self.__players[self.__current_player_index]
         self.update_screen_pos()
 
+        self.__militia_ai.players = self.__players
+        self.__militia_ai.save("./ai.ai")
+
     @staticmethod
     def add_initial_unit_to_player(player, units: [Entity]):
         for unit in units:
             player.add_entity(unit)
 
-    def create_town_center(self, config: Configuration, section_name: str, player: Player, terrain: Terrain) -> TownCenter:
-        pos : Position
-        if not self.__players :
+    def create_town_center(self, config: Configuration, section_name: str, player: Player,
+                           terrain: Terrain) -> TownCenter:
+        pos: Position
+        if not self.__players:
             pos = Position(random.randrange(terrain.width), random.randrange(terrain.height))
-        else :
+        else:
             old_pos = self.__players[0].get_town_center().position
             pos = Position(random.randrange(terrain.width), random.randrange(terrain.height))
-            while pos.dist(old_pos) < terrain.width/3 :
+            while pos.dist(old_pos) < terrain.width / 3:
                 pos = Position(random.randrange(terrain.width), random.randrange(terrain.height))
         return TownCenter(name=config.get_string('Town Center', 'name'),
                           health_points=config.get_int('Town Center', 'health_points'),
@@ -162,8 +173,10 @@ class World:
 
     def play_turn(self):
         if self.__current_player.is_human:
-            pass
+            return
         else:
-            for entity in self.__current_player.entities:
-                entity.auto_play()
-            self._next_player()
+            for entity in filter(lambda x: isinstance(x, Militia), self.__current_player.entities):
+                entity.compute_possible_action()
+                # entity.on_action(self.__militia_ai.chose_action(entity))
+                self.__militia_ai.step(entity)
+        self._next_player()

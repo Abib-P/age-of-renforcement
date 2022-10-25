@@ -18,6 +18,9 @@ class MovableEntity(Entity):
         self._terrain = terrain
         self._possible_move = []
 
+    @property
+    def terrain(self):
+        return self._terrain
 
     @staticmethod
     def get_nb_move(start: Position, destination: Position, terrain: Terrain) -> int:

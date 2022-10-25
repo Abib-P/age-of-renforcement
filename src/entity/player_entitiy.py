@@ -19,3 +19,7 @@ class PlayerEntity:
 
     def on_action(self, position: Position):
         self._has_played = True
+
+    @property
+    def player(self) -> Player:
+        return self._player

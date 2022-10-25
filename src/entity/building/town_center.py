@@ -13,19 +13,17 @@ class TownCenter(Building):
 
     def create_villager(self):
         militia = None
-        if self._terrain.is_cell_empty(Position(x=self._position.x, y=self._position.y+1)) :
-            militia = self.__create_militia(Position(x=self._position.x, y=self._position.y+1))
-        elif self._terrain.is_cell_empty(Position(x=self._position.x+1, y=self._position.y)) :
-            militia = self.__create_militia(Position(x=self._position.x+1, y=self._position.y))
-        elif self._terrain.is_cell_empty(Position(x=self._position.x, y=self._position.y-1)) :
-            militia = self.__create_militia(Position(x=self._position.x, y=self._position.y-1))
-        elif self._terrain.is_cell_empty(Position(x=self._position.x-1, y=self._position.y)) :
-            militia = self.__create_militia(Position(x=self._position.x-1, y=self._position.y))
+        if self._terrain.is_cell_empty(Position(x=self._position.x, y=self._position.y + 1)):
+            militia = self.__create_militia(Position(x=self._position.x, y=self._position.y + 1))
+        elif self._terrain.is_cell_empty(Position(x=self._position.x + 1, y=self._position.y)):
+            militia = self.__create_militia(Position(x=self._position.x + 1, y=self._position.y))
+        elif self._terrain.is_cell_empty(Position(x=self._position.x, y=self._position.y - 1)):
+            militia = self.__create_militia(Position(x=self._position.x, y=self._position.y - 1))
+        elif self._terrain.is_cell_empty(Position(x=self._position.x - 1, y=self._position.y)):
+            militia = self.__create_militia(Position(x=self._position.x - 1, y=self._position.y))
         if militia is not None:
             self._player.add_entity(militia)
             self._terrain.place_entity(militia)
-
-
 
     def __create_militia(self, position: Position):
         return Militia(
@@ -41,6 +39,5 @@ class TownCenter(Building):
         )
 
     def auto_play(self):
-        self.__create_villager()
-
-
+        # self.__create_villager()
+        pass

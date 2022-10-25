@@ -33,7 +33,8 @@ class MainWindow(arcade.Window):
         if not self.__world.is_game_ended():
             self.__world.play_turn()
         else:
-            print("Game Over")
+            self.__world.reset()
+            print("reset")
 
     def on_mouse_press(self, x, y, button, modifiers):
         if button == arcade.MOUSE_BUTTON_LEFT:
@@ -66,6 +67,9 @@ class MainWindow(arcade.Window):
         elif key == arcade.key.ENTER:
             self.__selected_entity = None
             self.__world.player_end_turn()
+        elif key == arcade.key.SPACE:
+            self.__selected_entity = None
+            self.__world.reset()
 
     def on_key_release(self, key: int, modifiers: int):
         super().on_key_release(key, modifiers)
