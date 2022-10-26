@@ -1,7 +1,6 @@
 import random
 
 import arcade
-from arcade import SpriteList
 
 from src.ai.militia_ai import MilitiaAi
 from src.configuration import Configuration
@@ -56,7 +55,7 @@ class World:
         self.__screen_offset = Position(0, 0)
 
         self.__militia_ai = MilitiaAi([], alpha=0.8, gamma=0.8)
-        self.__militia_ai.load("./ai.ai")
+        # self.__militia_ai.load("./ai.ai")
         self.reset()
 
     def reset(self):
@@ -129,7 +128,7 @@ class World:
                         int((position.y - self.__screen_offset.y) / self.__scale))
 
     def get_entity_on_clic(self, clic: Position) -> Entity:
-        return self.__terrain.get_entity(self.screen_position_to_terrain(clic))
+        return self.__terrain.get_entity_at_position(self.screen_position_to_terrain(clic))
 
     def action_entity(self, entity: Entity, position: Position):
         if not self.__current_player.is_human:

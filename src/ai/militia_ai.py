@@ -1,9 +1,9 @@
-from typing import Tuple, Any
+import pickle
 
+from src.entity.building.town_center import TownCenter
 from src.entity.position import Position
 from src.entity.unit.militia import Militia, MilitiaOnActionRes
 from src.player.player import Player
-import pickle
 
 
 class MilitiaAi:
@@ -23,6 +23,7 @@ class MilitiaAi:
                          MilitiaOnActionRes.ATTACK_MILITIA: 10,
                          MilitiaOnActionRes.KILL_MILITIA: 20,
                          MilitiaOnActionRes.ATTACK_TOWN: 50,
+                         # peut etre a changer car meurt souvant en attaquant la base enemy
                          MilitiaOnActionRes.KILL_TOWN: 100}
 
         self._alpha = alpha
@@ -90,19 +91,45 @@ class MilitiaAi:
         return (militia.position.x == 0, militia.position.x == militia.terrain.width - 1,
                 militia.position.y == 0, militia.position.y == militia.terrain.height - 1)
 
+    def __get_element_at_position(self, militia: Militia, position: Position) -> str:
+        if not militia.terrain.is_in_bound(position):
+            return '#'
+        if militia.terrain.is_cell_empty(position):
+            return 'O'
+        entity = militia.terrain.get_entity_at_position(position)
+        if isinstance(entity, Militia):
+            if entity.player == militia.player:
+                return 'A'
+            else:
+                return 'E'
+        if isinstance(entity, TownCenter):
+            if entity.player == militia.player:
+                return 'A'
+            else:
+                return 'E'
+        raise Exception('Unknown entity')
+
+    def __get_next_to_agent(self, militia: Militia) -> tuple[str, str, str, str]:
+        return (self.__get_element_at_position(militia, Position(militia.position.x - 1, militia.position.y)),
+                self.__get_element_at_position(militia, Position(militia.position.x + 1, militia.position.y)),
+                self.__get_element_at_position(militia, Position(militia.position.x, militia.position.y - 1)),
+                self.__get_element_at_position(militia, Position(militia.position.x, militia.position.y + 1)))
+
     def __get_state(self, militia: Militia):
         direction_enemy_town_center = self.__get_town_center_enemy_direction(militia)
         direction_ally_town_center = self.__get_direction(militia.position,
                                                           self.__get_ally_town_center_position(militia))
         is_nearest_town_center_ally = self.__is_nearest_town_center_ally(militia)
         direction_nearest_enemy = self.__get_nearset_enemy_direction(militia)
-        out_of_bound_state = self.__get_out_of_bound_state(militia)
+        # out_of_bound_state = self.__get_out_of_bound_state(militia)
+        next_to_agent = self.__get_next_to_agent(militia)
 
         state = (direction_nearest_enemy,
                  direction_enemy_town_center,
                  direction_ally_town_center,
                  is_nearest_town_center_ally,
-                 out_of_bound_state)
+                 #  out_of_bound_state,
+                 next_to_agent)
         return state
 
     def __get_state_actions(self, state):
