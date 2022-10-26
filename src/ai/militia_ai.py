@@ -1,3 +1,4 @@
+import os
 import pickle
 
 from src.entity.building.town_center import TownCenter
@@ -181,3 +182,6 @@ class MilitiaAi:
     def save(self, path: str):
         with open(path, 'wb') as file:
             pickle.dump(self._qtable, file)
+
+    def file_exists(self, path: str) -> bool:
+        return os.path.isfile(path)
