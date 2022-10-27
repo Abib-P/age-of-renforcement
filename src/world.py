@@ -169,7 +169,7 @@ class World:
             self._next_player()
 
     def is_game_ended(self) -> bool:
-        return len([p for p in self.__players if p.is_alive()]) == 1
+        return len([p for p in self.__players if p.is_alive()]) <= 1
 
     def play_turn(self):
         if self.__current_player.is_human:
@@ -183,6 +183,13 @@ class World:
 
     def learn(self, iterations):
         for i in range(iterations):
+            if i % 100 == 0:
+                print(i)
             self.reset()
             while not self.is_game_ended():
+                # FIX de merde mais nessaissaire dans le cas ou il n'y a plus que 2 bases sur la map (bug)
+                if len(list(filter(lambda e: isinstance(e, Militia), self.__players[0].entities))) == 0 \
+                        and len(list(filter(lambda e: isinstance(e, Militia), self.__players[1].entities))) == 0:
+                    self.__players[0].get_town_center().take_damage(1)
+                    self.__players[1].get_town_center().take_damage(1)
                 self.play_turn()

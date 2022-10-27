@@ -7,6 +7,6 @@ from src.world import World
 if __name__ == '__main__':
     config = Configuration("../config/default.ini")
     world = World(config)
-    world.learn(1000)
+    world.learn(100000)
     windows = MainWindow(world)
     arcade.run()
