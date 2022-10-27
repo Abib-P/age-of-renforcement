@@ -180,3 +180,9 @@ class World:
                 # entity.on_action(self.__militia_ai.chose_action(entity))
                 self.__militia_ai.step(entity)
         self._next_player()
+
+    def learn(self, iterations):
+        for i in range(iterations):
+            self.reset()
+            while not self.is_game_ended():
+                self.play_turn()

@@ -1,5 +1,6 @@
 import os
 import pickle
+from random import uniform, choice
 
 from src.entity.building.town_center import TownCenter
 from src.entity.position import Position
@@ -15,10 +16,13 @@ class MilitiaAi:
     _alpha: float
     _gamma: float
 
-    def __init__(self, players: [Player], alpha: float, gamma: float):
+    def __init__(self, players: [Player], alpha: float, gamma: float, exploration: float = 1,
+                 cooling_rate: float = 0.9999):
         self.players = players
         self._qtable = {}
         self._possible_actions = ['R', 'L', 'U', 'D', 'O']
+        self.__exploration = exploration
+        self.__cooling_rate = cooling_rate
         self._rewards = {MilitiaOnActionRes.FORBIDDEN: -100,
                          MilitiaOnActionRes.MOVE: -1,
                          MilitiaOnActionRes.ATTACK_MILITIA: 10,
@@ -142,6 +146,9 @@ class MilitiaAi:
         return self._qtable[state]
 
     def __get_best_action(self, state) -> str:
+        if uniform(0, 1) < self.__exploration:
+            self.__exploration *= self.__cooling_rate
+            return choice(self._possible_actions)
         actions = self.__get_state_actions(state)
         return max(actions, key=actions.get)
 
