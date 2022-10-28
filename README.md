@@ -12,7 +12,7 @@ chaque joueur a 2 unité:
 
 ## IA :
 
-#### Qtable:
+#### Qtable pour militia:
 
 - direction de l’ennemi le plus proche : "O ; R ; L ; U ; D ; RU ; RD ; LU ; LD"
 - direction de la town center ennemi : "R ; L ; U ; D ; RU ; RD ; LU ; LD"
@@ -21,3 +21,7 @@ chaque joueur a 2 unité:
 - qu'est-ce que j'ai sur autour de mon agent avec comme valeur possible : "# (extrémité du terrain); O (rien); A (
   allier); E (ennemi)"
   - donc les valuers possible sont stocker dans un tuple. ex : "(#,O,A,E) ; (O,O,O,O) ; (O,O,O,E) ..."
+
+#### Action dispo pour militia:
+ 
+ - move dans chaque direction + wait : "U, D, L, R, O (sur place)"
