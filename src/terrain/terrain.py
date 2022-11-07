@@ -60,13 +60,18 @@ class Terrain:
         if self.is_in_bound(entity.position):
             self.__cells[entity.position.y][entity.position.x].place_entity(None)
 
-    def get_entity(self, position: Position) -> Any | None:
+    def get_entity_at_position(self, position: Position) -> Any | None:
         if not self.is_in_bound(position):
             return None
         return self.__cells[position.y][position.x].entity
 
     def draw(self):
         self.__cells_sprites.draw()
+
+    def reset(self):
+        for ir, row in enumerate(self.__cells):
+            for ic, col in enumerate(row):
+               col.place_entity(None)
 
     def save(self, file_path: str):
         f = open(file_path, "w")

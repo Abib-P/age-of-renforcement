@@ -39,9 +39,9 @@ class Militia(FightingEntity, MovableEntity):
         if self._has_played:
             return MilitiaOnActionRes.FORBIDDEN
 
-        entity = self._terrain.get_entity(destination)
+        entity = self._terrain.get_entity_at_position(destination)
         if entity is None:
-            if super().move(destination):
+            if self.move(destination):
                 super().on_action(destination)
                 return MilitiaOnActionRes.MOVE
             return MilitiaOnActionRes.FORBIDDEN
@@ -53,7 +53,7 @@ class Militia(FightingEntity, MovableEntity):
             return self._get_return_on_action(entity)
         else:
             best = sorted(self._possible_move, key=lambda x: x[0].dist(destination))
-            if len(best) > 0 and super().move(best[0][0]) and self._position.dist(destination) <= self._unit_range:
+            if len(best) > 0 and self.move(best[0][0]) and self._position.dist(destination) <= self._unit_range:
                 self.attack(entity)
                 super().on_action(destination)
             return self._get_return_on_action(entity)
@@ -65,9 +65,6 @@ class Militia(FightingEntity, MovableEntity):
     def _die(self):
         super()._die()
         self._terrain.remove_entity(self)
-
-    def set_position(self):
-        self._position = Position()
 
     def auto_play(self):
         self.compute_possible_action()

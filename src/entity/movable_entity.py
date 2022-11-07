@@ -32,7 +32,6 @@ class MovableEntity(Entity):
                 and self._terrain.move_entity(self, destination):
             self._position = destination
             self.compute_possible_action()
-            self._possible_move = []
             return True
         return False
 

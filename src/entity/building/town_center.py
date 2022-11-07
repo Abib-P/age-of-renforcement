@@ -32,9 +32,9 @@ class TownCenter(Building):
             sprite=arcade.Sprite(":resources:images/animated_characters/zombie/zombie_idle.png"),
             position=position,
             player=self._player,
-            health_points=10,
+            health_points=50,
             moving_points=1,
-            attack_points=5,
+            attack_points=10,
             unit_range=1
         )
 

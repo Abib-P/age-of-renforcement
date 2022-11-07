@@ -1,9 +1,12 @@
-from typing import Tuple, Any
+import json
+import os
+import pickle
+from random import uniform, choice
 
+from src.entity.building.town_center import TownCenter
 from src.entity.position import Position
 from src.entity.unit.militia import Militia, MilitiaOnActionRes
 from src.player.player import Player
-import pickle
 
 
 class MilitiaAi:
@@ -13,18 +16,25 @@ class MilitiaAi:
     _rewards: {}
     _alpha: float
     _gamma: float
+    _exploration: float
+    _score: float
 
-    def __init__(self, players: [Player], alpha: float, gamma: float):
+    def __init__(self, players: [Player], alpha: float, gamma: float, exploration: float = 0,
+                 cooling_rate: float = 0.99):
         self.players = players
         self._qtable = {}
         self._possible_actions = ['R', 'L', 'U', 'D', 'O']
-        self._rewards = {MilitiaOnActionRes.FORBIDDEN: -100,
+        self._exploration = exploration
+        self.__cooling_rate = cooling_rate
+        self._rewards = {MilitiaOnActionRes.FORBIDDEN: -100000,
                          MilitiaOnActionRes.MOVE: -1,
-                         MilitiaOnActionRes.ATTACK_MILITIA: 10,
-                         MilitiaOnActionRes.KILL_MILITIA: 20,
-                         MilitiaOnActionRes.ATTACK_TOWN: 50,
-                         MilitiaOnActionRes.KILL_TOWN: 100}
+                         MilitiaOnActionRes.ATTACK_MILITIA: 100,
+                         MilitiaOnActionRes.KILL_MILITIA: 200,
+                         MilitiaOnActionRes.ATTACK_TOWN: 300,
+                         # peut etre a changer car meurt souvant en attaquant la base enemy
+                         MilitiaOnActionRes.KILL_TOWN: 400}
 
+        self._score = 0
         self._alpha = alpha
         self._gamma = gamma
 
@@ -90,19 +100,48 @@ class MilitiaAi:
         return (militia.position.x == 0, militia.position.x == militia.terrain.width - 1,
                 militia.position.y == 0, militia.position.y == militia.terrain.height - 1)
 
+    def __get_element_at_position(self, militia: Militia, position: Position) -> str:
+        if not militia.terrain.is_in_bound(position):
+            return '#'
+        if militia.terrain.is_cell_empty(position):
+            return 'O'
+        entity = militia.terrain.get_entity_at_position(position)
+        if entity is None:
+            raise Exception('Unknown entity')
+
+        if isinstance(entity, Militia):
+            if entity.player == militia.player:
+                return 'A'
+            else:
+                return 'E'
+        if isinstance(entity, TownCenter):
+            if entity.player == militia.player:
+                return 'A'
+            else:
+                return 'E'
+        raise Exception('Unknown entity')
+
+    def __get_next_to_agent(self, militia: Militia) -> tuple[str, str, str, str]:
+        return (self.__get_element_at_position(militia, Position(militia.position.x - 1, militia.position.y)),
+                self.__get_element_at_position(militia, Position(militia.position.x + 1, militia.position.y)),
+                self.__get_element_at_position(militia, Position(militia.position.x, militia.position.y - 1)),
+                self.__get_element_at_position(militia, Position(militia.position.x, militia.position.y + 1)))
+
     def __get_state(self, militia: Militia):
         direction_enemy_town_center = self.__get_town_center_enemy_direction(militia)
         direction_ally_town_center = self.__get_direction(militia.position,
                                                           self.__get_ally_town_center_position(militia))
-        is_nearest_town_center_ally = self.__is_nearest_town_center_ally(militia)
+        # is_nearest_town_center_ally = self.__is_nearest_town_center_ally(militia)
         direction_nearest_enemy = self.__get_nearset_enemy_direction(militia)
-        out_of_bound_state = self.__get_out_of_bound_state(militia)
+        # out_of_bound_state = self.__get_out_of_bound_state(militia)
+        next_to_agent = self.__get_next_to_agent(militia)
 
-        state = (direction_nearest_enemy,
+        state = (direction_ally_town_center,
+                 direction_nearest_enemy,
                  direction_enemy_town_center,
-                 direction_ally_town_center,
-                 is_nearest_town_center_ally,
-                 out_of_bound_state)
+                 # is_nearest_town_center_ally,
+                 #  out_of_bound_state,
+                 next_to_agent)
         return state
 
     def __get_state_actions(self, state):
@@ -114,6 +153,9 @@ class MilitiaAi:
         return self._qtable[state]
 
     def __get_best_action(self, state) -> str:
+        if uniform(0, 1) < self._exploration:
+            self._exploration *= self.__cooling_rate
+            return choice(self._possible_actions)
         actions = self.__get_state_actions(state)
         return max(actions, key=actions.get)
 
@@ -135,6 +177,7 @@ class MilitiaAi:
 
     def step(self, militia: Militia):
         old_state = self.__get_state(militia)
+
         old_state_action = self.__get_state_actions(old_state)
         action = self.__get_best_action(old_state)
         res = militia.on_action(self.chose_action(militia))
@@ -142,6 +185,7 @@ class MilitiaAi:
         new_state = self.__get_state(militia)
         new_state_action = self.__get_state_actions(new_state)
         reward = self._rewards[res]
+        self._score += reward
 
         max_reward = max(new_state_action.values())
         old_state_action[action] += \
@@ -154,3 +198,26 @@ class MilitiaAi:
     def save(self, path: str):
         with open(path, 'wb') as file:
             pickle.dump(self._qtable, file)
+
+    def save_visible(self, path: str):
+        with open(path, 'w') as file:
+            for key, value in self._qtable.items():
+                file.write(json.dumps(key) + " : " + json.dumps(value) + "\n")
+
+    def file_exists(self, path: str) -> bool:
+        return os.path.isfile(path)
+
+    @property
+    def exploration(self):
+        return self._exploration
+
+    @exploration.setter
+    def exploration(self, value):
+        self._exploration = value
+
+    @property
+    def score(self):
+        return self._score
+
+    def reset(self):
+        self._score = 0
