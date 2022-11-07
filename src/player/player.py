@@ -16,6 +16,9 @@ class Player:
     def remove_entity(self, entity: Entity):
         self.__entities.remove(entity)
 
+    def __eq__(self, o: object) -> bool:
+        return isinstance(o, Player) and self.__name == o.__name
+
     @property
     def name(self):
         return self.__name

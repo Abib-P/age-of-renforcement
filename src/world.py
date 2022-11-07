@@ -62,6 +62,10 @@ class World:
     def reset(self):
         self.__players = []
         self.__turn = 0
+        self.__militia_ai.save("ai.ai")
+        self.__militia_ai.save_visible("ai.txt")
+        self.__militia_ai.reset()
+        self.__terrain.reset()
 
         for i in range(self.__config.get_int('Players', 'number')):
             section_name = "Player_" + str(i + 1)
@@ -82,7 +86,15 @@ class World:
         self.update_screen_pos()
 
         self.__militia_ai.players = self.__players
-        self.__militia_ai.save("./ai.ai")
+
+    def set_ai_exploration(self, exploration: float):
+        self.__militia_ai.exploration = exploration
+
+    def get_ai_exploration(self):
+        return self.__militia_ai.exploration
+
+    def get_ai_score(self):
+        return self.__militia_ai.score
 
     @staticmethod
     def add_initial_unit_to_player(player, units: [Entity]):
@@ -182,14 +194,20 @@ class World:
         self._next_player()
 
     def learn(self, iterations):
+        max_turn = 1000
         for i in range(iterations):
             if i % 100 == 0:
                 print(i)
+                self.__militia_ai.save("./ai.ai")
+                self.__militia_ai.save_visible("./ai.txt")
             self.reset()
-            while not self.is_game_ended():
+            nb_turn = 0
+            while not self.is_game_ended() and nb_turn < max_turn:
                 # FIX de merde mais nessaissaire dans le cas ou il n'y a plus que 2 bases sur la map (bug)
                 if len(list(filter(lambda e: isinstance(e, Militia), self.__players[0].entities))) == 0 \
                         and len(list(filter(lambda e: isinstance(e, Militia), self.__players[1].entities))) == 0:
                     self.__players[0].get_town_center().take_damage(1)
                     self.__players[1].get_town_center().take_damage(1)
                 self.play_turn()
+                nb_turn += 1
+

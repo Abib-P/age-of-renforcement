@@ -1,4 +1,5 @@
 import arcade
+import arcade.gui
 
 from src.entity.entity import Entity
 from src.entity.position import Position
@@ -13,13 +14,72 @@ class MainWindow(arcade.Window):
     __selected_entity: Entity | None
 
     def __init__(self, world: World):
-        super().__init__(1280,
-                         720,
-                         'Age Of Renforcement')
+        super().__init__(1280, 720, 'Age Of Renforcement')
         self.__selected_entity = None
         self.__world = world
         self.world_dy = 0
         self.world_dx = 0
+
+        # Creating a UI MANAGER to handle the UI
+        self.uimanager = arcade.gui.UIManager()
+        self.uimanager.enable()
+
+        # Create a vertical BoxGroup to align buttons
+        self.v_box = arcade.gui.UIBoxLayout(align="left")
+
+        quit_button = arcade.gui.UIFlatButton(text="Quit Game",
+                                              width=200)
+
+        quit_button.on_click = self.on_quit_button_click
+        self.v_box.add(quit_button.with_space_around(bottom=20))
+
+        # Creating Button using UIFlatButton
+        reset_button = arcade.gui.UIFlatButton(text="Reset Game",
+                                               width=200)
+        reset_button.on_click = self.on_reset_button_click
+        self.v_box.add(reset_button.with_space_around(bottom=20))
+
+        self.score_label = arcade.gui.UILabel(text="test")
+        self.v_box.add(self.score_label.with_space_around(bottom=20))
+
+        self.exploration_label = arcade.gui.UILabel(text="test")
+        self.v_box.add(self.exploration_label.with_space_around(bottom=20))
+
+        # Adding button in our uimanager
+        self.uimanager.add(
+            arcade.gui.UIAnchorWidget(
+                anchor_x="left",
+                anchor_y="top",
+                child=self.v_box)
+        )
+
+        self.__init_temp_panel()
+
+    def __init_temp_panel(self):
+        # Create a vertical BoxGroup to align buttons
+        self.v_box = arcade.gui.UIBoxLayout(align="left")
+        # Creating Button using UIFlatButton
+        temp_button = arcade.gui.UIFlatButton(text="Temp",
+                                              width=200)
+
+        temp_button.on_click = self.on_temp_button_click
+        self.v_box.add(temp_button.with_space_around(bottom=20))
+
+        self.uimanager.add(
+            arcade.gui.UIAnchorWidget(
+                anchor_x="right",
+                anchor_y="top",
+                child=self.v_box)
+        )
+
+    def on_quit_button_click(self, event):
+        self.close()
+
+    def on_reset_button_click(self, event):
+        self.__world.reset()
+
+    def on_temp_button_click(self, event):
+        self.__world.set_ai_exploration(1)
 
     def on_draw(self):
         arcade.start_render()
@@ -27,7 +87,16 @@ class MainWindow(arcade.Window):
         if self.__selected_entity is not None:
             self.__selected_entity.draw_on_selection()
 
+        # Drawing our ui manager
+        self.uimanager.draw()
+
     def on_update(self, delta_time):
+        self.exploration_label.text = "exploration: " + str(self.__world.get_ai_exploration())
+        self.exploration_label.fit_content()
+
+        self.score_label.text = "score: " + str(self.__world.get_ai_score())
+        self.score_label.fit_content()
+
         self.__world.move_y(self.world_dy)
         self.__world.move_x(self.world_dx)
         if not self.__world.is_game_ended():
@@ -62,14 +131,9 @@ class MainWindow(arcade.Window):
             self.world_dx = 10
         elif key == arcade.key.D:
             self.world_dx = -10
-        elif key == arcade.key.ESCAPE:
-            self.close()
         elif key == arcade.key.ENTER:
             self.__selected_entity = None
             self.__world.player_end_turn()
-        elif key == arcade.key.SPACE:
-            self.__selected_entity = None
-            self.__world.reset()
 
     def on_key_release(self, key: int, modifiers: int):
         super().on_key_release(key, modifiers)

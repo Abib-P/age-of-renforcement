@@ -68,6 +68,11 @@ class Terrain:
     def draw(self):
         self.__cells_sprites.draw()
 
+    def reset(self):
+        for ir, row in enumerate(self.__cells):
+            for ic, col in enumerate(row):
+               col.place_entity(None)
+
     def save(self, file_path: str):
         f = open(file_path, "w")
 
