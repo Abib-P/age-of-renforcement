@@ -54,16 +54,16 @@ class World:
         self.__scale = 10
         self.__screen_offset = Position(0, 0)
 
-        self.__militia_ai = MilitiaAi([], alpha=0.8, gamma=0.8)
-        if self.__militia_ai.file_exists("./ai.ai"):
-            self.__militia_ai.load("./ai.ai")
+        self.__militia_ai = MilitiaAi([], alpha=0.02, gamma=0.8)
+        if self.__militia_ai.file_exists("./ai_nn.ai"):
+            self.__militia_ai.load("./ai_nn.ai")
         self.reset()
 
     def reset(self):
         self.__players = []
         self.__turn = 0
-        self.__militia_ai.save("ai.ai")
-        self.__militia_ai.save_visible("ai.txt")
+        self.__militia_ai.save("ai_nn.ai")
+        self.__militia_ai.save_visible("ai_nn.txt")
         self.__militia_ai.reset()
         self.__terrain.reset()
 
@@ -194,7 +194,7 @@ class World:
         self._next_player()
 
     def learn(self, iterations):
-        max_turn = 1000
+        max_turn = 100
         for i in range(iterations):
             if i % 100 == 0:
                 print(i)
@@ -202,8 +202,11 @@ class World:
                 self.__militia_ai.save_visible("./ai.txt")
             self.reset()
             nb_turn = 0
-            while not self.is_game_ended() and nb_turn < max_turn:
+            while not self.is_game_ended():
                 # FIX de merde mais nessaissaire dans le cas ou il n'y a plus que 2 bases sur la map (bug)
+                if nb_turn % max_turn == 0:
+                    self.__militia_ai.exploration = 1
+
                 if len(list(filter(lambda e: isinstance(e, Militia), self.__players[0].entities))) == 0 \
                         and len(list(filter(lambda e: isinstance(e, Militia), self.__players[1].entities))) == 0:
                     self.__players[0].get_town_center().take_damage(1)
