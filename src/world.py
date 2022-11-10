@@ -54,7 +54,7 @@ class World:
         self.__scale = 10
         self.__screen_offset = Position(0, 0)
 
-        self.__militia_ai = MilitiaAi([], alpha=0.8, gamma=0.8)
+        self.__militia_ai = MilitiaAi([], alpha=1, gamma=1)
         if self.__militia_ai.file_exists("./ai.ai"):
             self.__militia_ai.load("./ai.ai")
         self.reset()

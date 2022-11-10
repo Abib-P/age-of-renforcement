@@ -26,13 +26,12 @@ class MilitiaAi:
         self._possible_actions = ['R', 'L', 'U', 'D', 'O']
         self._exploration = exploration
         self.__cooling_rate = cooling_rate
-        self._rewards = {MilitiaOnActionRes.FORBIDDEN: -100000,
+        self._rewards = {MilitiaOnActionRes.FORBIDDEN: -400,
                          MilitiaOnActionRes.MOVE: -1,
-                         MilitiaOnActionRes.ATTACK_MILITIA: 100,
-                         MilitiaOnActionRes.KILL_MILITIA: 200,
-                         MilitiaOnActionRes.ATTACK_TOWN: 300,
-                         # peut etre a changer car meurt souvant en attaquant la base enemy
-                         MilitiaOnActionRes.KILL_TOWN: 400}
+                         MilitiaOnActionRes.ATTACK_MILITIA: -1,
+                         MilitiaOnActionRes.KILL_MILITIA: 100,
+                         MilitiaOnActionRes.ATTACK_TOWN: -1,
+                         MilitiaOnActionRes.KILL_TOWN: 200}
 
         self._score = 0
         self._alpha = alpha
@@ -184,7 +183,9 @@ class MilitiaAi:
 
         new_state = self.__get_state(militia)
         new_state_action = self.__get_state_actions(new_state)
+
         reward = self._rewards[res]
+
         self._score += reward
 
         max_reward = max(new_state_action.values())
