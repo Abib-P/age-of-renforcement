@@ -69,9 +69,11 @@ class World:
 
         for i in range(self.__config.get_int('Players', 'number')):
             section_name = "Player_" + str(i + 1)
+            color_str = self.__config.get_string(section_name, 'color')
+            color = color_str.split(",")
             player = Player(
                 name=self.__config.get_string(section_name, 'name'),
-                color=self.__config.get_string(section_name, 'color'),
+                color=(int(color[0]), int(color[1]), int(color[2])),
                 is_human=self.__config.get_bool(section_name, 'human'),
             )
 
@@ -200,7 +202,7 @@ class World:
     def learn(self, iterations):
 
         for i in range(iterations):
-            max_turn = 500
+            max_turn = 10000
 
             # print(i)
             if i % 100 == 0:
@@ -211,9 +213,11 @@ class World:
             nb_turn = 0
             while not self.is_game_ended():
                 if nb_turn >= max_turn:
+                    print("game aborted")
+                    break
                     # print("exploration" + str(self.__militia_ai.exploration))
-                    self.__militia_ai.exploration = 1
-                    max_turn += 2000
+                    # self.__militia_ai.exploration = 1
+                    # max_turn += 2000
 
                 # FIX de merde mais nessaissaire dans le cas ou il n'y a plus que 2 bases sur la map (bug)
                 if len(list(filter(lambda e: isinstance(e, Militia), self.__players[0].entities))) == 0 \
@@ -222,4 +226,3 @@ class World:
                     self.__players[1].get_town_center().take_damage(1)
                 self.play_turn()
                 nb_turn += 1
-
