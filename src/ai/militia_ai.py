@@ -21,6 +21,7 @@ class MilitiaAi:
     _score_history: []
     _nb_turn: int
     _step_history_max: int
+    _step_history_scale: float
 
     def __init__(self, players: [Player], alpha: float, gamma: float, exploration: float = 0,
                  cooling_rate: float = 0.99):
@@ -28,11 +29,12 @@ class MilitiaAi:
         self._qtable = {}
         self._score_history = []
         self._step_history_max = 1
+        self._step_history_scale = 0.01
         self._possible_actions = ['L', 'R', 'U', 'D', 'O']
         self._exploration = exploration
         self.__cooling_rate = cooling_rate
         self._rewards = {MilitiaOnActionRes.FORBIDDEN: -400,
-                         MilitiaOnActionRes.MOVE: -1,
+                         MilitiaOnActionRes.MOVE: -2,
                          MilitiaOnActionRes.ATTACK_MILITIA: -1,
                          MilitiaOnActionRes.KILL_MILITIA: 25,
                          MilitiaOnActionRes.ATTACK_TOWN: -1,
@@ -186,16 +188,17 @@ class MilitiaAi:
         current_state_action = self.__get_state_actions(current_state)
         max_reward = max(current_state_action.values())
 
-        selected_action = self.__get_best_action(current_state)
-        res = militia.on_action(self.chose_action(militia))
-        reward = self._rewards[res]
-
         for previous_step in militia.step_history:
             previous_state_actions = self.__get_state_actions(previous_step[0])
             previous_state_actions[previous_step[1]] += self._alpha * (previous_step[2] + self._gamma * max_reward - previous_state_actions[previous_step[1]])
 
         if len(militia.step_history) >= self._step_history_max:
             militia.step_history.pop(0)
+
+        selected_action = self.__get_best_action(current_state)
+        res = militia.on_action(self.chose_action(militia))
+        reward = self._rewards[res]
+
         militia.step_history.append((current_state, selected_action, reward))
 
         self._score += reward
@@ -206,12 +209,14 @@ class MilitiaAi:
             self._qtable = pickle.load(file)
 
     def save(self, path: str):
-        with open("ai2_history.txt", 'a') as file:
+        with open(path, 'wb') as file:
+            pickle.dump(self._qtable, file)
+
+    def save_histo(self, path: str):
+        with open(path, 'a') as file:
             for h in self._score_history:
                 file.write(str(h[0]) + " " + str(h[1]) + "\n")
         self._score_history = []
-        with open(path, 'wb') as file:
-            pickle.dump(self._qtable, file)
 
     def save_visible(self, path: str):
         with open(path, 'w') as file:
@@ -236,6 +241,10 @@ class MilitiaAi:
     @property
     def history(self):
         return self._score_history
+
+    @property
+    def nb_turn(self):
+        return self._nb_turn
 
     def reset(self):
         self._score_history.append((self._score, self._nb_turn))

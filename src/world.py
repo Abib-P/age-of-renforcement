@@ -54,16 +54,18 @@ class World:
         self.__scale = 10
         self.__screen_offset = Position(0, 0)
 
-        self.__militia_ai = MilitiaAi([], alpha=1, gamma=1)
-        if self.__militia_ai.file_exists("./ai2.ai"):
-            self.__militia_ai.load("./ai2.ai")
+        self.__ia_name = "ai2"
+        self.__militia_ai = MilitiaAi([], alpha=1, gamma=0.9)
+        if self.__militia_ai.file_exists(self.__ia_name + ".ai"):
+            self.__militia_ai.load(self.__ia_name + ".ai")
         self.reset()
 
     def reset(self):
         self.__players = []
         self.__turn = 0
-        self.__militia_ai.save("ai2.ai")
-        self.__militia_ai.save_visible("ai2.txt")
+        self.__militia_ai.save(self.__ia_name + ".ai")
+        self.__militia_ai.save_visible(self.__ia_name + ".txt")
+        self.__militia_ai.save_histo(self.__ia_name + "_histo.txt")
         self.__militia_ai.reset()
         self.__terrain.reset()
 
@@ -191,6 +193,7 @@ class World:
 
     def play_turn(self):
         if self.__current_player.is_human:
+            print("player is human")
             return
         else:
             for entity in filter(lambda x: isinstance(x, Militia), self.__current_player.entities):
@@ -202,27 +205,19 @@ class World:
     def learn(self, iterations):
 
         for i in range(iterations):
-            max_turn = 10000
-
-            # print(i)
+            max_turn = 1000
             if i % 100 == 0:
                 print(i)
-                self.__militia_ai.save("./ai.ai")
-                self.__militia_ai.save_visible("./ai.txt")
             self.reset()
-            nb_turn = 0
+
             while not self.is_game_ended():
-                if nb_turn >= max_turn:
-                    print("game aborted")
-                    break
+                if self.__militia_ai.nb_turn >= max_turn:
+                    # print("game aborted : " + str(i))
+                    # print("game explored : " + str(self.__militia_ai.exploration))
+                    self.__militia_ai.exploration = 0.2
+                    max_turn += 1000
                     # print("exploration" + str(self.__militia_ai.exploration))
                     # self.__militia_ai.exploration = 1
                     # max_turn += 2000
 
-                # FIX de merde mais nessaissaire dans le cas ou il n'y a plus que 2 bases sur la map (bug)
-                if len(list(filter(lambda e: isinstance(e, Militia), self.__players[0].entities))) == 0 \
-                        and len(list(filter(lambda e: isinstance(e, Militia), self.__players[1].entities))) == 0:
-                    self.__players[0].get_town_center().take_damage(1)
-                    self.__players[1].get_town_center().take_damage(1)
                 self.play_turn()
-                nb_turn += 1
