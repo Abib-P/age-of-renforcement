@@ -55,15 +55,15 @@ class World:
         self.__screen_offset = Position(0, 0)
 
         self.__militia_ai = MilitiaAi([], alpha=1, gamma=1)
-        if self.__militia_ai.file_exists("./ai.ai"):
-            self.__militia_ai.load("./ai.ai")
+        if self.__militia_ai.file_exists("./ai2.ai"):
+            self.__militia_ai.load("./ai2.ai")
         self.reset()
 
     def reset(self):
         self.__players = []
         self.__turn = 0
-        self.__militia_ai.save("ai.ai")
-        self.__militia_ai.save_visible("ai.txt")
+        self.__militia_ai.save("ai2.ai")
+        self.__militia_ai.save_visible("ai2.txt")
         self.__militia_ai.reset()
         self.__terrain.reset()
 
@@ -171,6 +171,10 @@ class World:
     def scale(self):
         return self.__scale
 
+    @property
+    def history(self):
+        return self.__militia_ai.history
+
     def _next_player(self):
         self.__current_player.end_turn()
         self.__current_player_index = (self.__current_player_index + 1) % len(self.__players)
@@ -194,15 +198,23 @@ class World:
         self._next_player()
 
     def learn(self, iterations):
-        max_turn = 1000
+
         for i in range(iterations):
+            max_turn = 500
+
+            # print(i)
             if i % 100 == 0:
                 print(i)
                 self.__militia_ai.save("./ai.ai")
                 self.__militia_ai.save_visible("./ai.txt")
             self.reset()
             nb_turn = 0
-            while not self.is_game_ended() and nb_turn < max_turn:
+            while not self.is_game_ended():
+                if nb_turn >= max_turn:
+                    # print("exploration" + str(self.__militia_ai.exploration))
+                    self.__militia_ai.exploration = 1
+                    max_turn += 2000
+
                 # FIX de merde mais nessaissaire dans le cas ou il n'y a plus que 2 bases sur la map (bug)
                 if len(list(filter(lambda e: isinstance(e, Militia), self.__players[0].entities))) == 0 \
                         and len(list(filter(lambda e: isinstance(e, Militia), self.__players[1].entities))) == 0:
