@@ -18,10 +18,16 @@ class MilitiaOnActionRes(Enum):
 
 class Militia(FightingEntity, MovableEntity):
     state: ()
+    _step_history: []
 
     def __init__(self, **kwargs):
         super(Militia, self).__init__(**kwargs)
         self.state = ()
+        self._step_history = []
+
+    @property
+    def step_history(self):
+        return self._step_history
 
     def _get_return_on_action(self, entity: Entity):
         from src.entity.building.town_center import TownCenter
@@ -33,11 +39,11 @@ class Militia(FightingEntity, MovableEntity):
             if entity.is_alive():
                 return MilitiaOnActionRes.ATTACK_MILITIA
             return MilitiaOnActionRes.KILL_MILITIA
-        return MilitiaOnActionRes.FORBIDDEN
+        raise Exception('Unknown entity')
 
     def on_action(self, destination: Position):
-        if self._has_played:
-            return MilitiaOnActionRes.FORBIDDEN
+        if destination.y == self.position.y and destination.x == self.position.x:
+            return MilitiaOnActionRes.MOVE
 
         entity = self._terrain.get_entity_at_position(destination)
         if entity is None:

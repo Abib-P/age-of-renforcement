@@ -16,7 +16,8 @@ class Building(AttackableEntity, PlayerEntity, Entity):
         super().draw()
         self.draw_ui(Position((self._position.x + 0.5) * self._scale + self._screen_offset.x,
                               (self._position.y + 1) * self._scale + self._screen_offset.y, ),
-                     self._scale)
+                     self._scale,
+                     self.player.color)
 
     def _die(self):
         super()._die()

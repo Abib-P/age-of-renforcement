@@ -12,16 +12,28 @@ chaque joueur a 2 unité:
 
 ## IA :
 
-#### Qtable pour militia:
+### Qtable pour militia:
 
-- direction de l’ennemi le plus proche : "O ; R ; L ; U ; D ; RU ; RD ; LU ; LD"
-- direction de la town center ennemi : "R ; L ; U ; D ; RU ; RD ; LU ; LD"
-- direction de la town allié : "R ; L ; U ; D ; RU ; RD ; LU ; LD"
-- est-ce que la town-center allier est plus proche que celle ennemy : "True ; False"
+- direction de la town allié : "R ; L ; U ; D"
+- direction de l’ennemi le plus proche : "O ; R ; L ; U ; D"
+- direction de la town center ennemi : "R ; L ; U ; D"
 - qu'est-ce que j'ai sur autour de mon agent avec comme valeur possible : "# (extrémité du terrain); O (rien); A (
-  allier); E (ennemi)"
-  - donc les valuers possible sont stocker dans un tuple. ex : "(#,O,A,E) ; (O,O,O,O) ; (O,O,O,E) ..."
+  allier); TE (Town center enemy); ME (Militia enemy)"
+  - donc les valuers possible sont stocker dans un tuple. ex : "(#,O,A,TE) ; (O,O,O,O) ; (O,#,O,ME) ..."
 
-#### Action dispo pour militia:
- 
- - move dans chaque direction + wait : "U, D, L, R, O (sur place)"
+### Action dispo pour militia:
+
+- move dans chaque direction + wait : "U, D, L, R, O (sur place)"
+- faire une action impossible ne fait pas bouger l'agent
+- faire un déplacement sur une unité enemy l'attaque
+
+### Récompense
+
+|           Reward description           | Reward |
+|:--------------------------------------:|-------:|
+|          un movement interdit          |   -400 |
+|    se déplacer ou rester sur place     |     -2 |
+|      attaquer une milice ennemie       |     -1 |
+|         tuer une milice ennemy         |     25 |
+|        attaquer un town center         |     -1 |
+| tuer le town center (gagner la partie) |    200 |

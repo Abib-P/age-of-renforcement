@@ -18,23 +18,30 @@ class MilitiaAi:
     _gamma: float
     _exploration: float
     _score: float
+    _score_history: []
+    _nb_turn: int
+    _step_history_max: int
+    _step_history_scale: float
 
     def __init__(self, players: [Player], alpha: float, gamma: float, exploration: float = 0,
                  cooling_rate: float = 0.99):
         self.players = players
         self._qtable = {}
-        self._possible_actions = ['R', 'L', 'U', 'D', 'O']
+        self._score_history = []
+        self._step_history_max = 1
+        self._step_history_scale = 0.01
+        self._possible_actions = ['L', 'R', 'U', 'D', 'O']
         self._exploration = exploration
         self.__cooling_rate = cooling_rate
-        self._rewards = {MilitiaOnActionRes.FORBIDDEN: -100000,
-                         MilitiaOnActionRes.MOVE: -1,
-                         MilitiaOnActionRes.ATTACK_MILITIA: 100,
-                         MilitiaOnActionRes.KILL_MILITIA: 200,
-                         MilitiaOnActionRes.ATTACK_TOWN: 300,
-                         # peut etre a changer car meurt souvant en attaquant la base enemy
-                         MilitiaOnActionRes.KILL_TOWN: 400}
+        self._rewards = {MilitiaOnActionRes.FORBIDDEN: -400,
+                         MilitiaOnActionRes.MOVE: -2,
+                         MilitiaOnActionRes.ATTACK_MILITIA: -1,
+                         MilitiaOnActionRes.KILL_MILITIA: 25,
+                         MilitiaOnActionRes.ATTACK_TOWN: -1,
+                         MilitiaOnActionRes.KILL_TOWN: 200}
 
         self._score = 0
+        self._nb_turn = 0
         self._alpha = alpha
         self._gamma = gamma
 
@@ -55,15 +62,16 @@ class MilitiaAi:
         dy = dst.y - src.y
         res = ''
 
-        if dx > 0:
-            res += 'R'
-        elif dx < 0:
-            res += 'L'
-
-        if dy > 0:
-            res += 'U'
-        elif dy < 0:
-            res += 'D'
+        if abs(dx) > abs(dy):
+            if dx > 0:
+                res += 'R'
+            else:
+                res += 'L'
+        else:
+            if dy > 0:
+                res += 'U'
+            else:
+                res += 'D'
 
         return res
 
@@ -113,19 +121,19 @@ class MilitiaAi:
             if entity.player == militia.player:
                 return 'A'
             else:
-                return 'E'
+                return 'ME'
         if isinstance(entity, TownCenter):
             if entity.player == militia.player:
                 return 'A'
             else:
-                return 'E'
+                return 'TE'
         raise Exception('Unknown entity')
 
     def __get_next_to_agent(self, militia: Militia) -> tuple[str, str, str, str]:
         return (self.__get_element_at_position(militia, Position(militia.position.x - 1, militia.position.y)),
                 self.__get_element_at_position(militia, Position(militia.position.x + 1, militia.position.y)),
-                self.__get_element_at_position(militia, Position(militia.position.x, militia.position.y - 1)),
-                self.__get_element_at_position(militia, Position(militia.position.x, militia.position.y + 1)))
+                self.__get_element_at_position(militia, Position(militia.position.x, militia.position.y + 1)),
+                self.__get_element_at_position(militia, Position(militia.position.x, militia.position.y - 1)))
 
     def __get_state(self, militia: Militia):
         direction_enemy_town_center = self.__get_town_center_enemy_direction(militia)
@@ -176,20 +184,25 @@ class MilitiaAi:
         return self.__move_position(militia.position, self.__get_best_action(self.__get_state(militia)))
 
     def step(self, militia: Militia):
-        old_state = self.__get_state(militia)
+        current_state = self.__get_state(militia)
+        current_state_action = self.__get_state_actions(current_state)
+        max_reward = max(current_state_action.values())
 
-        old_state_action = self.__get_state_actions(old_state)
-        action = self.__get_best_action(old_state)
+        for previous_step in militia.step_history:
+            previous_state_actions = self.__get_state_actions(previous_step[0])
+            previous_state_actions[previous_step[1]] += self._alpha * (previous_step[2] + self._gamma * max_reward - previous_state_actions[previous_step[1]])
+
+        if len(militia.step_history) >= self._step_history_max:
+            militia.step_history.pop(0)
+
+        selected_action = self.__get_best_action(current_state)
         res = militia.on_action(self.chose_action(militia))
-
-        new_state = self.__get_state(militia)
-        new_state_action = self.__get_state_actions(new_state)
         reward = self._rewards[res]
-        self._score += reward
 
-        max_reward = max(new_state_action.values())
-        old_state_action[action] += \
-            self._alpha * (reward + self._gamma * max_reward - old_state_action[action])
+        militia.step_history.append((current_state, selected_action, reward))
+
+        self._score += reward
+        self._nb_turn += 1
 
     def load(self, path: str):
         with open(path, 'rb') as file:
@@ -198,6 +211,12 @@ class MilitiaAi:
     def save(self, path: str):
         with open(path, 'wb') as file:
             pickle.dump(self._qtable, file)
+
+    def save_histo(self, path: str):
+        with open(path, 'a') as file:
+            for h in self._score_history:
+                file.write(str(h[0]) + " " + str(h[1]) + "\n")
+        self._score_history = []
 
     def save_visible(self, path: str):
         with open(path, 'w') as file:
@@ -219,5 +238,16 @@ class MilitiaAi:
     def score(self):
         return self._score
 
+    @property
+    def history(self):
+        return self._score_history
+
+    @property
+    def nb_turn(self):
+        return self._nb_turn
+
     def reset(self):
+        self._score_history.append((self._score, self._nb_turn))
+        self._nb_turn = 0
         self._score = 0
+        self._exploration = 0

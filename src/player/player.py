@@ -1,10 +1,12 @@
+import arcade
+
 from src.entity.entity import Entity
 
 
 class Player:
     __entities: [Entity]
 
-    def __init__(self, name: str, color: str, is_human: bool = False):
+    def __init__(self, name: str, color: arcade.Color, is_human: bool = False):
         self.__name = name
         self.__color = color
         self.__is_human = is_human
