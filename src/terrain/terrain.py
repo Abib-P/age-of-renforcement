@@ -19,13 +19,20 @@ class Terrain:
         self.__cells = cells
         self.__height = height
         self.__width = width
+        self.__resources = []
 
         self.__cells_sprites = SpriteList()
         for ir, row in enumerate(self.__cells):
             for ic, col in enumerate(row):
                 self.__cells_sprites.append(col.sprite)
 
+    def add_resource(self, resource: Entity):
+        self.__resources.append(resource)
+        self.place_entity(resource)
+
     def update_screen_pos(self, scale, offset: Position):
+        for resource in self.__resources:
+            resource.update_screen_pos(scale, offset)
         for ir, row in enumerate(self.__cells):
             for ic, col in enumerate(row):
                 col.update_screen_pos(scale, Position(int((ic + 0.5) * scale + offset.x),
@@ -65,13 +72,25 @@ class Terrain:
             return None
         return self.__cells[position.y][position.x].entity
 
+    def collect_resource(self, entity: Entity):
+        self.__resources.remove(entity)
+        self.__cells[entity.position.y][entity.position.x].place_entity(None)
+
+    def get_nearest_resource(self, position: Position):
+        if len(self.__resources) == 0:
+            return None
+        return min(self.__resources, key=lambda x: x.position.dist(position))
+
     def draw(self):
         self.__cells_sprites.draw()
+        for resource in self.__resources:
+            resource.draw()
 
     def reset(self):
         for ir, row in enumerate(self.__cells):
             for ic, col in enumerate(row):
-               col.place_entity(None)
+                col.place_entity(None)
+        self.__resources = []
 
     def save(self, file_path: str):
         f = open(file_path, "w")

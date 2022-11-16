@@ -3,12 +3,15 @@ import random
 import arcade
 
 from src.ai.militia_ai import MilitiaAi
+from src.ai.villager_ai import VillagerAi
 from src.configuration import Configuration
 from src.entity.building.town_center import TownCenter
 from src.entity.entity import Entity
+from src.entity.neutral.resource import Resource
 from src.entity.player_entitiy import PlayerEntity
 from src.entity.position import Position
 from src.entity.unit.militia import Militia
+from src.entity.unit.villager import Villager
 from src.player.player import Player
 from src.terrain.terrain import Terrain
 from src.terrain.terrain_cell import TerrainCell
@@ -54,19 +57,27 @@ class World:
         self.__scale = 10
         self.__screen_offset = Position(0, 0)
 
-        self.__ia_name = "ai2"
+        self.__ia_militia_name = "militia_ai4"
+        self.__ia_villager_name = "villager_ai4"
         self.__militia_ai = MilitiaAi([], alpha=1, gamma=0.9)
-        if self.__militia_ai.file_exists(self.__ia_name + ".ai"):
-            self.__militia_ai.load(self.__ia_name + ".ai")
+        self.__villager_ai = VillagerAi([], alpha=1, gamma=0.9)
+        if self.__militia_ai.file_exists(self.__ia_militia_name + ".ai"):
+            self.__militia_ai.load(self.__ia_militia_name + ".ai")
+        if self.__villager_ai.file_exists(self.__ia_villager_name + ".ai"):
+            self.__villager_ai.load(self.__ia_villager_name + ".ai")
         self.reset()
 
     def reset(self):
         self.__players = []
         self.__turn = 0
-        self.__militia_ai.save(self.__ia_name + ".ai")
-        self.__militia_ai.save_visible(self.__ia_name + ".txt")
-        self.__militia_ai.save_histo(self.__ia_name + "_histo.txt")
+        self.__militia_ai.save(self.__ia_militia_name + ".ai")
+        self.__militia_ai.save_visible(self.__ia_militia_name + ".txt")
+        self.__militia_ai.save_histo(self.__ia_militia_name + "_histo.txt")
+        self.__villager_ai.save(self.__ia_villager_name + ".ai")
+        self.__villager_ai.save_visible(self.__ia_villager_name + ".txt")
+        self.__villager_ai.save_histo(self.__ia_villager_name + "_histo.txt")
         self.__militia_ai.reset()
+        self.__villager_ai.reset()
         self.__terrain.reset()
 
         for i in range(self.__config.get_int('Players', 'number')):
@@ -80,19 +91,24 @@ class World:
             )
 
             town_center = self.create_town_center(self.__config, section_name, player, self.__terrain)
+            # town_center.create_militia()
             town_center.create_villager()
             self.__terrain.place_entity(town_center)
             self.__players.append(player)
             self.add_initial_unit_to_player(player, units=[town_center])
 
+        resource = self.__create_resources()
+        self.__terrain.add_resource(resource)
         self.__current_player_index = 0
         self.__current_player = self.__players[self.__current_player_index]
         self.update_screen_pos()
 
         self.__militia_ai.players = self.__players
+        self.__villager_ai.players = self.__players
 
     def set_ai_exploration(self, exploration: float):
         self.__militia_ai.exploration = exploration
+        self.__villager_ai.exploration = exploration
 
     def get_ai_exploration(self):
         return self.__militia_ai.exploration
@@ -192,10 +208,15 @@ class World:
         return len([p for p in self.__players if p.is_alive()]) <= 1
 
     def play_turn(self):
+        self.__current_player.play_turn()
         if self.__current_player.is_human:
             print("player is human")
             return
         else:
+            for entity in filter(lambda x: isinstance(x, Villager), self.__current_player.entities):
+                entity.compute_possible_action()
+                # entity.on_action(self.__militia_ai.chose_action(entity))
+                self.__villager_ai.step(entity)
             for entity in filter(lambda x: isinstance(x, Militia), self.__current_player.entities):
                 entity.compute_possible_action()
                 # entity.on_action(self.__militia_ai.chose_action(entity))
@@ -221,3 +242,10 @@ class World:
                     # max_turn += 2000
 
                 self.play_turn()
+
+    def __create_resources(self):
+        pos = Position(random.randrange(self.__terrain.width), random.randrange(self.__terrain.height))
+        while self.__terrain.get_entity_at_position(pos) is not None:
+            pos = Position(random.randrange(self.__terrain.width), random.randrange(self.__terrain.height))
+        return Resource(name="resource", position=pos, sprite=arcade.Sprite(":resources:images/items/coinGold.png"),
+                        terrain=self.__terrain)

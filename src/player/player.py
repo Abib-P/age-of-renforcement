@@ -7,6 +7,7 @@ class Player:
     __entities: [Entity]
 
     def __init__(self, name: str, color: arcade.Color, is_human: bool = False):
+        self.__resources_count = 0
         self.__name = name
         self.__color = color
         self.__is_human = is_human
@@ -20,6 +21,14 @@ class Player:
 
     def __eq__(self, o: object) -> bool:
         return isinstance(o, Player) and self.__name == o.__name
+
+    def add_resource(self):
+        self.__resources_count += 1
+
+    def play_turn(self):
+        if self.__resources_count > 0:
+            self.get_town_center().create_militia()
+            self.__resources_count -= 1
 
     @property
     def name(self):

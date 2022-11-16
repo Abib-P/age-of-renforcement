@@ -4,6 +4,7 @@ from enum import Enum
 from src.entity.entity import Entity
 from src.entity.fighting_entity import FightingEntity
 from src.entity.movable_entity import MovableEntity
+from src.entity.neutral.resource import Resource
 from src.entity.position import Position
 
 
@@ -14,6 +15,8 @@ class MilitiaOnActionRes(Enum):
     KILL_MILITIA = 3
     ATTACK_TOWN = 4
     KILL_TOWN = 5
+    ATTACK_VILLAGER = 6
+    KILL_VILLAGER = 7
 
 
 class Militia(FightingEntity, MovableEntity):
@@ -31,6 +34,7 @@ class Militia(FightingEntity, MovableEntity):
 
     def _get_return_on_action(self, entity: Entity):
         from src.entity.building.town_center import TownCenter
+        from src.entity.unit.villager import Villager
         if isinstance(entity, TownCenter):
             if entity.is_alive():
                 return MilitiaOnActionRes.ATTACK_TOWN
@@ -39,6 +43,12 @@ class Militia(FightingEntity, MovableEntity):
             if entity.is_alive():
                 return MilitiaOnActionRes.ATTACK_MILITIA
             return MilitiaOnActionRes.KILL_MILITIA
+        elif isinstance(entity, Villager):
+            if entity.is_alive():
+                return MilitiaOnActionRes.ATTACK_VILLAGER
+            return MilitiaOnActionRes.KILL_VILLAGER
+        elif isinstance(entity, Resource):
+            return MilitiaOnActionRes.FORBIDDEN
         raise Exception('Unknown entity')
 
     def on_action(self, destination: Position):
@@ -50,6 +60,8 @@ class Militia(FightingEntity, MovableEntity):
             if self.move(destination):
                 super().on_action(destination)
                 return MilitiaOnActionRes.MOVE
+            return MilitiaOnActionRes.FORBIDDEN
+        elif isinstance(entity, Resource):
             return MilitiaOnActionRes.FORBIDDEN
         elif entity.belongs_to(self._player):
             return MilitiaOnActionRes.FORBIDDEN
