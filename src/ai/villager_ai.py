@@ -40,10 +40,10 @@ class VillagerAi:
                          VillagerOnActionRes.ATTACK_MILITIA: -1,
                          VillagerOnActionRes.KILL_MILITIA: 25,
                          VillagerOnActionRes.ATTACK_TOWN: -1,
-                         VillagerOnActionRes.KILL_TOWN: 200,
+                         VillagerOnActionRes.KILL_TOWN: 50,
                          VillagerOnActionRes.ATTACK_VILLAGER: -1,
                          VillagerOnActionRes.KILL_VILLAGER: 10,
-                         VillagerOnActionRes.COLLECT_RESOURCE: 30, }
+                         VillagerOnActionRes.COLLECT_RESOURCE: 200, }
 
         self._score = 0
         self._nb_turn = 0

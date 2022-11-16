@@ -16,6 +16,7 @@ class Entity:
         self.__name = name
         self._position = position
         self._scale = 10
+        self._screen_offset = Position(0, 0)
 
     def update_screen_pos(self, scale, offset: Position):
         self._scale = scale

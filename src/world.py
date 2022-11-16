@@ -91,8 +91,8 @@ class World:
             )
 
             town_center = self.create_town_center(self.__config, section_name, player, self.__terrain)
-            # town_center.create_militia()
             town_center.create_villager()
+            town_center.create_militia()
             self.__terrain.place_entity(town_center)
             self.__players.append(player)
             self.add_initial_unit_to_player(player, units=[town_center])
@@ -226,19 +226,28 @@ class World:
     def learn(self, iterations):
 
         for i in range(iterations):
-            max_turn = 1000
+            max_turn_militia = 1000
+            max_turn_villager = 1000
             if i % 100 == 0:
                 print(i)
             self.reset()
 
             while not self.is_game_ended():
-                if self.__militia_ai.nb_turn >= max_turn:
+                if self.__militia_ai.nb_turn >= max_turn_militia:
                     # print("game aborted : " + str(i))
                     # print("game explored : " + str(self.__militia_ai.exploration))
                     self.__militia_ai.exploration = 0.2
-                    max_turn += 1000
+                    max_turn_militia += 1000
                     # print("exploration" + str(self.__militia_ai.exploration))
                     # self.__militia_ai.exploration = 1
+                    # max_turn += 2000
+                if self.__villager_ai.nb_turn >= max_turn_villager:
+                    # print("game aborted : " + str(i))
+                    # print("game explored : " + str(self.__villager_ai.exploration))
+                    self.__villager_ai.exploration = 0.2
+                    max_turn_villager += 1000
+                    # print("exploration" + str(self.__villager_ai.exploration))
+                    # self.__villager_ai.exploration = 1
                     # max_turn += 2000
 
                 self.play_turn()
